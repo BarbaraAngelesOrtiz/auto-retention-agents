@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+pandas
+scikit-learn
+python-dotenv
+requests  # si usas Microsoft Graph API
