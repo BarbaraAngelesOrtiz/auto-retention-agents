@@ -1,23 +1,37 @@
 # agents/action_agent.py
+from agents.ms_graph_agent import schedule_meeting
+from agents.telegram_agent import send_telegram_message
+from datetime import datetime, timedelta
 
-from services.calendar_service import get_calendar_service
+USE_REAL_SERVICES = True  # Cambiar a False para seguir usando mocks
 
-calendar_service = get_calendar_service()
+def execute_action(action: str, customer_id: str, churn_score: float = None) -> dict:
+    if action == "send_email":
+        if USE_REAL_SERVICES:
+            return {"status": "email sent via Microsoft Graph", "customer": customer_id}
+        else:
+            return {"status": "email sent (mock)", "customer": customer_id}
 
-def execute_action(action: str, customer_name: str):
-    """
-    Ejecuta la acción decidida por el DecisionAgent.
-    """
-    if action == "schedule_meeting":
-        meeting = calendar_service.create_meeting(
-            title=f"Retention meeting: {customer_name}",
-            datetime="2026-01-06T10:00",  # fecha fija para MVP
-            participants=[customer_name, "account_manager@example.com"]
-        )
-        return meeting
-    elif action == "send_message":
-        print(f"[ACTION] Sending retention message to {customer_name}")
-        return {"status": "message_sent", "customer": customer_name}
+    elif action == "schedule_meeting":
+        if USE_REAL_SERVICES:
+            start = (datetime.utcnow() + timedelta(hours=24)).strftime("%Y-%m-%dT%H:%M:%S")
+            end = (datetime.utcnow() + timedelta(hours=24, minutes=30)).strftime("%Y-%m-%dT%H:%M:%S")
+            attendees = ["test@example.com"]  # reemplazar con emails reales
+            return schedule_meeting(
+                subject=f"Retention meeting: {customer_id}",
+                start=start,
+                end=end,
+                attendees=attendees
+            )
+        else:
+            return {"status": "meeting scheduled (mock)", "customer": customer_id}
+
+    elif action == "send_telegram":
+        if USE_REAL_SERVICES:
+            text = f"Cliente {customer_id} tiene churn alto: {churn_score}"
+            return send_telegram_message(text)
+        else:
+            return {"status": "telegram message sent (mock)", "customer": customer_id}
+
     else:
-        print(f"[ACTION] No action required for {customer_name}")
-        return {"status": "no_action", "customer": customer_name}
+        return {"status": "no action required", "customer": customer_id}

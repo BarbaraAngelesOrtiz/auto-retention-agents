@@ -1,25 +1,33 @@
+# app.py
 from fastapi import FastAPI
+import pandas as pd
+import os
+
+from utils.churn_simulator import simulate_churn
 from agents.decision_agent import decide_action
 from agents.action_agent import execute_action
-from utils.churn_simulator import simulate_churn
-import pandas as pd
 
-# Cargar dataset
-df = pd.read_csv("data/Grocery_Customer_Churn_Data_Augmented.csv", dtype={"customer_id": str})
+# ======== Cargar dataset ========
+DATA_PATH = os.path.join("data", "Grocery_Customer_Churn_Data_Augmented.csv")
+df = pd.read_csv(DATA_PATH, dtype={"customer_id": str})
 
+# ======== Inicializar FastAPI ========
 app = FastAPI(title="AutoRetention Agents")
 
-@app.get("/test")
-def test_endpoint():
-    return {"status": "simulate_decision exists!"}
-
+# ======== Endpoint raíz ========
 @app.get("/")
 def root():
     return {"status": "AutoRetention Agents is running"}
 
+# ======== Endpoint para ver primeros customer_ids ========
+@app.get("/customer_ids")
+def customer_ids():
+    return df["customer_id"].dropna().tolist()[:20]
+
+# ======== Endpoint de simulación de decisión con agentes ========
 @app.get("/simulate_decision/{customer_id}")
 def simulate_decision(customer_id: str):
-    # Buscar cliente
+    # Buscar cliente en dataset
     row = df[df["customer_id"] == customer_id]
     if row.empty:
         return {"error": f"Customer ID {customer_id} not found"}
@@ -29,13 +37,11 @@ def simulate_decision(customer_id: str):
     # Simular churn
     churn_score = simulate_churn(customer)
 
-    # Customer value
-    customer_value = customer.get("total_sales", 1000)
-    customer_name = customer.get("customer_id", customer_id)
+    # ======== Usar agente de decisión ========
+    action = decide_action(churn_score)
 
-    # Agentes
-    action = decide_action(churn_score, customer_value)
-    result = execute_action(action, customer_name)
+    # ======== Usar agente de acción ========
+    result = execute_action(action, customer_id)
 
     return {
         "customer_id": customer_id,

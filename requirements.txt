@@ -1,6 +1,11 @@
-fastapi
-uvicorn
-pandas
-scikit-learn
-python-dotenv
-requests  # si usas Microsoft Graph API
+# Core
+fastapi==0.111.1
+uvicorn[standard]==0.23.2
+
+# Data
+pandas==2.1.1
+
+# Optional (para futuras expansiones o scripts de análisis)
+numpy==1.26.5
+python-multipart==0.0.6  # si planeás subir archivos
+requests==2.32.1          # para llamadas a APIs externas
