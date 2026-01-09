@@ -5,18 +5,19 @@ import requests
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-def send_telegram_message(message: str):
-    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
-        raise ValueError("Telegram credentials not found in environment variables")
+def send_telegram_message(text: str):
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
+    if not token or not chat_id:
+        return {"ok": False, "error": "Telegram not configured"}
 
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
     payload = {
-        "chat_id": TELEGRAM_CHAT_ID,
-        "text": message,
-        "parse_mode": "Markdown"
+        "chat_id": chat_id,
+        "text": text,
+        "parse_mode": None  # evita problemas con emojis o caracteres especiales
     }
+    r = requests.post(url, json=payload)
+    return r.json()
 
-    response = requests.post(url, json=payload)
-    return response.json()
 
