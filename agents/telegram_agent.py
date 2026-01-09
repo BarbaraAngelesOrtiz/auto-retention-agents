@@ -1,23 +1,26 @@
-# agents/telegram_agent.py
 import os
 import requests
 
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-def send_telegram_message(text: str):
-    token = os.getenv("TELEGRAM_BOT_TOKEN")
-    chat_id = os.getenv("TELEGRAM_CHAT_ID")
-    if not token or not chat_id:
+def telegram_enabled() -> bool:
+    """Verifica si Telegram está configurado correctamente"""
+    return all([TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID])
+
+def send_telegram_message(text: str) -> dict:
+    """Envía un mensaje por Telegram"""
+    if not telegram_enabled():
         return {"ok": False, "error": "Telegram not configured"}
 
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {
-        "chat_id": chat_id,
+        "chat_id": TELEGRAM_CHAT_ID,
         "text": text,
-        "parse_mode": None  # evita problemas con emojis o caracteres especiales
+        "parse_mode": "MarkdownV2"  # opcional
     }
-    r = requests.post(url, json=payload)
-    return r.json()
-
-
+    response = requests.post(url, json=payload)
+    try:
+        return response.json()
+    except Exception:
+        return {"ok": False, "error": "Failed to parse response from Telegram"}

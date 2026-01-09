@@ -1,40 +1,35 @@
 # test_agents.py
-import os
-from datetime import datetime, timedelta, timezone
+
+from dotenv import load_dotenv
+load_dotenv()
 from agents.ms_graph_agent import ms_graph_healthcheck, create_calendar_event, ms_graph_enabled
-from agents.telegram_agent import send_telegram_message
+from agents.telegram_agent import send_telegram_message, telegram_enabled
+from datetime import datetime, timedelta, timezone
 
 print("=== TEST MS GRAPH HEALTHCHECK ===")
-if not ms_graph_enabled():
-    print("⚠️ Microsoft Graph no está configurado. Ignorando healthcheck.")
+if ms_graph_enabled():
+    health_result = ms_graph_healthcheck()
+    print("Graph Healthcheck Result:", health_result)
 else:
-    result = ms_graph_healthcheck()
-    print("Graph Healthcheck Result:", result)
+    print("⚠️ Microsoft Graph no está configurado. Ignorando healthcheck.")
 
 print("\n=== TEST MS GRAPH CALENDAR ===")
-if not ms_graph_enabled():
-    print("⚠️ Microsoft Graph no configurado. Saltando creación de evento.")
-else:
+if ms_graph_enabled():
     start = (datetime.now(timezone.utc) + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S")
     end = (datetime.now(timezone.utc) + timedelta(hours=2)).strftime("%Y-%m-%dT%H:%M:%S")
-    subject = "Test Event from AutoRetention"
-    body = "Este evento fue creado automáticamente para probar MS Graph"
-
     calendar_result = create_calendar_event(
-        subject=subject,
-        body=body,
+        subject="Test Event",
+        body="Evento de prueba generado automáticamente",
         start=start,
         end=end
     )
     print("Calendar Event Result:", calendar_result)
+else:
+    print("⚠️ Microsoft Graph no configurado. Saltando creación de evento.")
 
 print("\n=== TEST TELEGRAM MESSAGE ===")
-BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-
-if not BOT_TOKEN or not CHAT_ID:
-    print("⚠️ Telegram no configurado. Saltando envío de mensaje.")
-else:
-    text = "🚨 Este es un mensaje de prueba desde AutoRetention Agents"
-    telegram_result = send_telegram_message(text)
+if telegram_enabled():
+    telegram_result = send_telegram_message("Mensaje de prueba desde agentes 🚀")
     print("Telegram Result:", telegram_result)
+else:
+    print("⚠️ Telegram no configurado. Saltando envío de mensaje.")
