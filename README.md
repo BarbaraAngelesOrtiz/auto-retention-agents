@@ -35,7 +35,7 @@ Feature flags
 Fallbacks
 
 
- Próximo salto
+* Próximo salto:
 
 Agregar Teams meeting link
 
