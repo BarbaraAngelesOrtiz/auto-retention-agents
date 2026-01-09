@@ -19,18 +19,28 @@ FastAPI app para simular decisiones de retención de clientes usando un churn sc
 5. Ver Swagger en `/docs`
 
 FastAPI
+
 Dataset real
+
 Simulación de churn
+
 Agentes
+
 Telegram real
+
 Microsoft Graph real
+
 Feature flags
+
 Fallbacks
 
 
  Próximo salto
 
 Agregar Teams meeting link
+
 Agente de auditoría / logging
+
 Orquestador multi-agente
+
 Scheduler automático
