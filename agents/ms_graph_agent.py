@@ -47,10 +47,10 @@ def ms_graph_healthcheck():
         "status_code": r.status_code,
         "response": r.json()
     }
-def create_calendar_event(subject: str, body: str, start_dt: str, end_dt: str):
+def create_calendar_event(subject: str, body: str, start: str, end: str):
     """
-    Crea un evento simple en el calendario del usuario (Outlook / Graph)
-    start_dt / end_dt en formato ISO 8601: 2026-01-08T15:00:00
+    Crea un evento en el calendario de Microsoft Graph.
+    start / end deben estar en formato ISO 8601: 2026-01-08T15:00:00
     """
     token = get_access_token()
     if not token:
@@ -62,29 +62,26 @@ def create_calendar_event(subject: str, body: str, start_dt: str, end_dt: str):
     }
 
     event_payload = {
-        "subject": subject,
-        "body": {
-            "contentType": "HTML",
-            "content": body
-        },
-        "start": {
-            "dateTime": start_dt,
-            "timeZone": "UTC"
-        },
-        "end": {
-            "dateTime": end_dt,
-            "timeZone": "UTC"
-        }
+            "subject": subject,
+            "body": {
+                "contentType": "HTML",
+                "content": body
+            },
+            "start": {
+                "dateTime": start,  # ⚠ start_dt no existe
+                "timeZone": "UTC"
+            },
+            "end": {
+                "dateTime": end,    # ⚠ end_dt no existe
+                "timeZone": "UTC"
+            }
     }
 
     response = requests.post(
-        "https://graph.microsoft.com/v1.0/users/{}/events".format(MS_USER_EMAIL),
+        f"https://graph.microsoft.com/v1.0/users/{MS_USER_EMAIL}/events",
         headers=headers,
         json=event_payload
     )
 
-    return {
-        "status_code": response.status_code,
-        "response": response.json()
-    }
+    return {"status_code": response.status_code, "response": response.json()}
 
