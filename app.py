@@ -1,4 +1,8 @@
 # app.py
+
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI
 import pandas as pd
 import os
@@ -6,6 +10,8 @@ import os
 from utils.churn_simulator import simulate_churn
 from agents.decision_agent import decide_action
 from agents.action_agent import execute_action
+from agents.ms_graph_agent import ms_graph_healthcheck
+
 
 # ======== Cargar dataset ========
 DATA_PATH = os.path.join("data", "Grocery_Customer_Churn_Data_Augmented.csv")
@@ -41,7 +47,7 @@ def simulate_decision(customer_id: str):
     action = decide_action(churn_score)
 
     # ======== Usar agente de acción ========
-    result = execute_action(action, customer_id)
+    result = execute_action(action, customer_id, churn_score=churn_score)
 
     return {
         "customer_id": customer_id,
@@ -49,3 +55,9 @@ def simulate_decision(customer_id: str):
         "action": action,
         "result": result
     }
+
+# ======== Endpoint de healthcheck para Microsoft Graph ========
+@app.get("/health/ms-graph")
+def health_ms_graph():
+    return ms_graph_healthcheck()
+

@@ -20,3 +20,32 @@ FastAPI app para simular decisiones de retención de clientes usando un churn sc
    - `/customer_ids` para primeros IDs
    - `/simulate_decision/<customer_id>` para simular churn
 5. Ver Swagger en `/docs`
+
+🔥 Esto ya es nivel “portfolio fuerte”
+
+Tenés:
+
+FastAPI
+
+Dataset real
+
+Simulación de churn
+
+Agentes
+
+Telegram real
+
+Microsoft Graph real
+
+Feature flags
+
+Fallbacks
+
+Muy pocos proyectos junior/semisenior llegan a este nivel.
+
+🔜 Próximo salto
+
+👉 Agregar Teams meeting link
+👉 Agente de auditoría / logging
+👉 Orquestador multi-agente
+👉 Scheduler automático
