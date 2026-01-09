@@ -1,6 +1,3 @@
-# auto-retention-agents
-Autonomous agents that transform churn risk into real business actions.
-
 # AutoRetention Agents
 
 FastAPI app para simular decisiones de retención de clientes usando un churn score.
