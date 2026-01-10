@@ -1,6 +1,3 @@
-# auto-retention-agents
-Autonomous agents that transform churn risk into real business actions.
-
 # AutoRetention Agents
 
 FastAPI app para simular decisiones de retención de clientes usando un churn score.
@@ -21,8 +18,6 @@ FastAPI app para simular decisiones de retención de clientes usando un churn sc
    - `/simulate_decision/<customer_id>` para simular churn
 5. Ver Swagger en `/docs`
 
-
-
 FastAPI
 
 Dataset real
@@ -40,15 +35,12 @@ Feature flags
 Fallbacks
 
 
+* Próximo salto:
 
- Agregar Teams meeting link
- Agente de auditoría / logging
- Orquestador multi-agente
- Scheduler automático
+Agregar Teams meeting link
 
-Instalar dependencias de Google
- pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib gspread oauth2client
+Agente de auditoría / logging
 
- telegram 
- pip install python-telegram-bot --upgrade
+Orquestador multi-agente
 
+Scheduler automático
