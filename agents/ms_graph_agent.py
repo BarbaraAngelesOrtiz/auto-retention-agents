@@ -8,6 +8,9 @@ MS_TENANT_ID = os.getenv("MS_TENANT_ID")
 MS_CLIENT_SECRET = os.getenv("MS_CLIENT_SECRET")
 GRAPH_SCOPE = "https://graph.microsoft.com/.default"
 
+TEAM_ID = os.getenv("TEAM_ID")
+CHANNEL_ID = os.getenv("CHANNEL_ID")
+
 def ms_graph_enabled() -> bool:
     return all([MS_CLIENT_ID, MS_TENANT_ID, MS_CLIENT_SECRET])
 
@@ -85,3 +88,28 @@ def create_calendar_event(subject: str, body: str, start: str, end: str):
         response_json = "<empty response>"
 
     return {"status_code": response.status_code, "response": response_json}
+
+def send_email(subject, body):
+    token = get_access_token()
+    url = f"https://graph.microsoft.com/v1.0/users/{MS_FROM_EMAIL}/sendMail"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "message": {
+            "subject": subject,
+            "body": {"contentType": "HTML", "content": body},
+            "toRecipients": [{"emailAddress": {"address": MS_TO_EMAIL}}]
+        }
+    }
+    r = requests.post(url, headers=headers, json=payload)
+    return {"status_code": r.status_code, "response": r.text}
+
+def send_teams_message(message):
+    token = get_access_token()
+    url = f"https://graph.microsoft.com/v1.0/teams/{TEAM_ID}/channels/{CHANNEL_ID}/messages"
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    payload = {"body": {"content": message}}
+    r = requests.post(url, headers=headers, json=payload)
+    return {"status_code": r.status_code, "response": r.text}
