@@ -20,6 +20,7 @@ def send_telegram_message(text: str) -> dict:
         "parse_mode": "MarkdownV2"  # opcional
     }
     response = requests.post(url, json=payload)
+
     try:
         return response.json()
     except Exception:

@@ -6,8 +6,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
-CREDS_FILE = os.getenv("GOOGLE_CREDENTIALS_FILE")  # tu credentials.json
-TOKEN_FILE = os.getenv("SHEETS_TOKEN_FILE", "sheets_token.json")
+CREDS_FILE = os.getenv("GOOGLE_CREDENTIALS_FILE")
+TOKEN_FILE = os.getenv("SHEETS_TOKEN_FILE")
 
 def get_sheets_service():
     creds = None
@@ -21,30 +21,28 @@ def get_sheets_service():
     service = build("sheets", "v4", credentials=creds)
     return service
 
-def write_to_sheet(range_name, values):
-    """
-    Escribe valores en Google Sheets
-    range_name: Ej: "Sheet1!A1"
-    values: lista de listas (filas)
-    """
-    # Limpiar NaN o None
-    clean_values = []
-    for row in values:
-        clean_row = ["" if (v is None or (isinstance(v, float) and np.isnan(v))) else v for v in row]
-        clean_values.append(clean_row)
-
+def write_to_sheet(spreadsheet_id: str, range_name: str, values: list[list]):
+    """Sobrescribe valores en un rango específico"""
     service = get_sheets_service()
-    spreadsheet_id = os.getenv("SPREADSHEET_ID")
-    result = (
-        service.spreadsheets()
-        .values()
-        .update(
-            spreadsheetId=spreadsheet_id,
-            range=range_name,      # Ej: "Sheet1!A1"
-            valueInputOption="RAW",
-            body={"values": clean_values},
-        )
-        .execute()
-    )
+    body = {"values": values}
+    result = service.spreadsheets().values().update(
+        spreadsheetId=spreadsheet_id,
+        range=range_name,
+        valueInputOption="RAW",
+        body=body
+    ).execute()
+    return result
+
+def append_to_sheet(spreadsheet_id: str, range_name: str, values: list[list]):
+    """Agrega valores al final de la hoja"""
+    service = get_sheets_service()
+    body = {"values": values}
+    result = service.spreadsheets().values().append(
+        spreadsheetId=spreadsheet_id,
+        range=range_name,
+        valueInputOption="RAW",
+        insertDataOption="INSERT_ROWS",
+        body=body
+    ).execute()
     return result
 

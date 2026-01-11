@@ -1,6 +1,6 @@
 # agents/ms_graph_agent.py
 import os
-import requests
+import test_api
 from datetime import datetime
 
 MS_CLIENT_ID = os.getenv("MS_CLIENT_ID")
@@ -27,7 +27,7 @@ def get_access_token():
         "grant_type": "client_credentials"
     }
 
-    response = requests.post(token_url, data=payload)
+    response = test_api.post(token_url, data=payload)
     response.raise_for_status()
     return response.json()["access_token"]
 
@@ -36,7 +36,7 @@ def ms_graph_healthcheck():
     headers = {"Authorization": f"Bearer {token}"}
     user_email = os.getenv("MS_USER_EMAIL")  # debe ser el UPN completo
     url = f"https://graph.microsoft.com/v1.0/users/{user_email}"
-    r = requests.get(url, headers=headers)
+    r = test_api.get(url, headers=headers)
     return {
         "status_code": r.status_code,
         "response": r.json() if r.content else "<empty response>"
@@ -80,7 +80,7 @@ def create_calendar_event(subject: str, body: str, start: str, end: str):
 
     url = f"https://graph.microsoft.com/v1.0/users/{MS_USER_EMAIL}/events"
 
-    response = requests.post(url, headers=headers, json=event_payload)
+    response = test_api.post(url, headers=headers, json=event_payload)
 
     try:
         response_json = response.json()
@@ -103,7 +103,7 @@ def send_email(subject, body):
             "toRecipients": [{"emailAddress": {"address": MS_TO_EMAIL}}]
         }
     }
-    r = requests.post(url, headers=headers, json=payload)
+    r = test_api.post(url, headers=headers, json=payload)
     return {"status_code": r.status_code, "response": r.text}
 
 def send_teams_message(message):
@@ -111,5 +111,5 @@ def send_teams_message(message):
     url = f"https://graph.microsoft.com/v1.0/teams/{TEAM_ID}/channels/{CHANNEL_ID}/messages"
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     payload = {"body": {"content": message}}
-    r = requests.post(url, headers=headers, json=payload)
+    r = test_api.post(url, headers=headers, json=payload)
     return {"status_code": r.status_code, "response": r.text}

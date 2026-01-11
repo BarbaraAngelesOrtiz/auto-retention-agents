@@ -1,14 +1,14 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from agents.google_calendar_agent import create_event
+from agents.action_agent import execute_action
 
-event = create_event(
-    summary="Prueba Retención Cliente",
-    description="Evento generado por agente",
-    start="2026-01-11T10:00:00Z",
-    end="2026-01-11T11:00:00Z",
-    attendees=["barbaraortiz1501@gmail.com"]  # reemplaza con tu email
+print("=== TEST CALENDAR + MEET ===")
+
+result = execute_action(
+    action="schedule_meeting_with_meet",
+    customer_id="C123",
+    churn_score=0.82
 )
 
-print(event)
+print("Result:", result)

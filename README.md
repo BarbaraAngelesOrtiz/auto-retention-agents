@@ -1,5 +1,7 @@
 # AutoRetention Agents
 
+Sistema multi-agente para retención automática de clientes basado en churn prediction, con integración real a herramientas de negocio (Calendar, Email, Chat, Sheets) y ejecución vía API.
+
 FastAPI app para simular decisiones de retención de clientes usando un churn score.
 
 ## Requisitos
@@ -35,12 +37,43 @@ Feature flags
 Fallbacks
 
 
-* Próximo salto:
+✅ uso real de Google APIs
+✅ automatización de decisiones
+✅ generación de canales de comunicación
+✅ arquitectura multi-agente
+✅ FastAPI + batch + real-world integrations
 
-Agregar Teams meeting link
+Para churn alto:
 
-Agente de auditoría / logging
+📅 Evento en Google Calendar + 🎥 Google Meet generado + correo de auditoria + 📊 Registro de la acción en Google Sheets
 
-Orquestador multi-agente
+✉️ Email automático con el link
 
-Scheduler automático
+
+
+Todo disparado desde un solo execute_action().
+
+✅ Test por tipo de acción
+
+Solo email
+
+Email + Meet
+
+Telegram
+
+No action
+
+✅ Test FastAPI
+POST /run-batch
+
+✅ Test con scheduler
+
+Simular corrida diaria
+
+✅ Test con error controlado
+
+Token vencido
+
+Sheet inexistente
+
+Telegram caído

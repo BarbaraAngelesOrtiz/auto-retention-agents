@@ -1,13 +1,49 @@
 # agents/decision_agent.py
+import random
 
-def decide_action(churn_score: float) -> str:
+def decide_action(churn_score: float, mode: str = "deterministic") -> str:
     """
-    Decide qué acción tomar según churn_score
+    Decide la acción a tomar según el churn_score.
+    :param churn_score: valor entre 0 y 1
+    :param mode: "deterministic" (por default) o "random"
+    :return: nombre de la acción
     """
-    if churn_score > 0.7:
-        return "schedule_meeting"
-    elif churn_score > 0.4:
-        return "send_email"
+    if mode == "deterministic":
+        if churn_score >= 0.85:
+            return "schedule_meeting_with_meet"
+        elif churn_score >= 0.6:
+            return "send_email"
+        elif churn_score >= 0.4:
+            return "send_telegram"  # nueva acción para clientes con churn medio
+        else:
+            return "no_action"
+    
+    elif mode == "random":
+        # Probabilidades según churn_score
+        if churn_score >= 0.85:
+            return random.choices(
+                ["schedule_meeting_with_meet", "send_email", "send_telegram", "no_action"],
+                weights=[0.6, 0.2, 0.15, 0.05],
+                k=1
+            )[0]
+        elif churn_score >= 0.6:
+            return random.choices(
+                ["send_email", "send_telegram", "schedule_meeting_with_meet", "no_action"],
+                weights=[0.5, 0.3, 0.1, 0.1],
+                k=1
+            )[0]
+        elif churn_score >= 0.4:
+            return random.choices(
+                ["send_telegram", "send_email", "no_action", "schedule_meeting_with_meet"],
+                weights=[0.5, 0.2, 0.25, 0.05],
+                k=1
+            )[0]
+        else:
+            return random.choices(
+                ["no_action", "send_telegram", "send_email", "schedule_meeting_with_meet"],
+                weights=[0.7, 0.2, 0.08, 0.02],
+                k=1
+            )[0]
+
     else:
-        return "no_action"
-
+        raise ValueError(f"Unknown mode: {mode}")

@@ -11,8 +11,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
-CREDENTIALS_FILE = os.getenv("GOOGLE_CREDENTIALS_FILE", "config/credentials.json")  # tu client_id/client_secret
-TOKEN_FILE = os.getenv("GMAIL_CREDENTIALS_FILE", "config/gmail_credentials.json")  # token generado
+CREDS_FILE = os.getenv("GOOGLE_CREDENTIALS_FILE")
+TOKEN_FILE = os.getenv("GMAIL_TOKEN_FILE")
 GMAIL_RECIPIENT = os.getenv("GMAIL_RECIPIENT")
 
 def get_gmail_service():
@@ -23,7 +23,7 @@ def get_gmail_service():
     
     # Si no hay token válido, generamos uno
     if not creds or not creds.valid:
-        flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_FILE, SCOPES)
+        flow = InstalledAppFlow.from_client_secrets_file(CREDS_FILE, SCOPES)
         creds = flow.run_local_server(port=0)
         # Guardamos el token para futuros usos
         with open(TOKEN_FILE, "w") as token:

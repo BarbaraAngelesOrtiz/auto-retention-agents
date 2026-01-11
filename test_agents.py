@@ -1,80 +1,62 @@
-# test_agents.py
-import os
-import numpy as np
+
+from dotenv import load_dotenv
+load_dotenv() 
+
+import pandas as pd
+from agents.decision_agent import decide_action
 from agents.action_agent import execute_action
+from agents.scoring_agent import calculate_churn_score
 
-# ==== TEST CUSTOMER ====
-TEST_CUSTOMER_ID = "C1000"
-TEST_CUSTOMER_ROW = {
-    "customer_id": "C1000",
-    "age": 33,
-    "gender": "Other",
-    "income_bracket": "Medium",
-    "loyalty_program": "Yes",
-    "membership_years": 1,
-    "marital_status": "Divorced",
-    "number_of_children": 2,
-    "education_level": "Master's",
-    "occupation": "Retired",
-    "transaction_id": "T1000",
-    "transaction_date": "2023-01-01",
-    "product_category": "Electronics",
-    "quantity": 1,
-    "unit_price": 75.45668142001342,
-    "avg_purchase_value": np.nan,
-    "purchase_frequency": np.nan,
-    "last_purchase_date": "2023-01-01",
-    "avg_discount_used": 11.33685322284007,
-    "online_purchases": 6,
-    "in_store_purchases": 0,
-    "total_sales": 1563.705816815419,
-    "total_transactions": 41,
-    "total_items_purchased": 55,
-    "promotion_type": np.nan,
-    "promotion_effectiveness": "Medium",
-    "days_since_last_purchase": 181,
-    "churn": 0,
-}
+CSV_PATH = "data/Grocery_Customer_Churn_Data_Augmented.csv"
+MAX_CUSTOMERS = 5    # para no spamear Calendar / Email
+CHURN_THRESHOLD = 0.6
 
-# ==== DECIDE ACTION SIMULADO ====
-# Aquí simulamos un churn score para decidir acción
-churn_score = 0.9  # por ejemplo
-if churn_score > 0.8:
-    action = "schedule_meeting"
-elif churn_score > 0.5:
-    action = "send_email"
-else:
-    action = "write_to_sheet"  # o "send_telegram"
-    
-print("=== TEST CUSTOMER ===")
-print(f"ID: {TEST_CUSTOMER_ID}")
-print(f"Data: {TEST_CUSTOMER_ROW}\n")
 
-print(f"Simulated Churn Score: {churn_score}")
-print(f"Decided Action: {action}\n")
+def run_system_test():
+    print("\n=== START END-TO-END SYSTEM TEST ===\n")
 
-# ==== EXECUTE MAIN ACTION ====
-result = execute_action(action, TEST_CUSTOMER_ID, churn_score=churn_score, row_data=TEST_CUSTOMER_ROW)
-print("=== EXECUTE ACTION ===")
-print("Result:", result, "\n")
+    df = pd.read_csv(CSV_PATH)
 
-# ==== WRITE TO SHEET ====
-# Siempre limpiar NaN/None antes de enviar
-def clean_row(row):
-    return ["" if (v is None or (isinstance(v, float) and np.isnan(v))) else v for v in row]
+    tested = 0
 
-values = [list(TEST_CUSTOMER_ROW.keys()), clean_row(list(TEST_CUSTOMER_ROW.values()))]
+    for _, row in df.iterrows():
+        if tested >= MAX_CUSTOMERS:
+            break
 
-sheet_result = execute_action("write_to_sheet", TEST_CUSTOMER_ID, churn_score=churn_score, row_data=TEST_CUSTOMER_ROW)
-print("=== WRITE TO SHEET ===")
-print(sheet_result, "\n")
+        customer_id = row.get("CustomerID", f"C{tested}")
+        print("-" * 40)
+        print(f"Customer: {customer_id}")
 
-# ==== SEND EMAIL ====
-email_result = execute_action("send_email", TEST_CUSTOMER_ID, churn_score=churn_score)
-print("=== SEND EMAIL ===")
-print(email_result, "\n")
+        # 1️⃣ Calcular churn score
+        row_dict = row.to_dict()
+        churn_score = calculate_churn_score(row_dict)
 
-# ==== SEND TELEGRAM ====
-telegram_result = execute_action("send_telegram", TEST_CUSTOMER_ID, churn_score=churn_score)
-print("=== SEND TELEGRAM ===")
-print(telegram_result, "\n")
+        print(f"Churn score: {round(churn_score, 3)}")
+
+        # 2️⃣ Decidir acción
+        action = decide_action(churn_score)
+        print(f"Decided action: {action}")
+
+        # 3️⃣ Ejecutar acción
+        if action != "no_action":
+            try:
+                result = execute_action(
+                    action=action,
+                    customer_id=customer_id,
+                    churn_score=churn_score,
+                    row_data=row.to_dict()
+                )
+                print("Action result:", result)
+            except Exception as e:
+                print("❌ ERROR executing action:", e)
+        else:
+            print("No action taken")
+
+        tested += 1
+        print()
+
+    print("\n=== END SYSTEM TEST ===")
+
+
+if __name__ == "__main__":
+    run_system_test()

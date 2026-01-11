@@ -1,74 +1,120 @@
 # agents/action_agent.py
 import os
-from dotenv import load_dotenv
-load_dotenv() 
-from datetime import datetime, timedelta
 import re
+from datetime import datetime, timedelta
+from dotenv import load_dotenv
 
-# Import de agentes
-from agents.google_calendar_agent import create_event as create_calendar_event
+load_dotenv()
+
+from agents.google_calendar_agent import create_event_with_meet
 from agents.gmail_agent import send_email
-from agents.google_sheets_agent import write_to_sheet
+from agents.google_sheets_agent import write_to_sheet, append_to_sheet 
 from agents.telegram_agent import send_telegram_message, telegram_enabled
 
-USE_REAL_SERVICES = True  # False = mocks
+USE_REAL_SERVICES = True
 
-# Función para escapar caracteres especiales de Telegram MarkdownV2
-def escape_telegram_text(text):
+# --- Util ---
+def escape_telegram_text(text: str) -> str:
     escape_chars = r'_*[]()~`>#+-=|{}.!'
     return re.sub(f"([{re.escape(escape_chars)}])", r"\\\1", text)
 
-def execute_action(action: str, customer_id: str, churn_score: float = None, row_data=None) -> dict:
-    """
-    Ejecuta una acción sobre el cliente:
-    - send_email
-    - schedule_meeting
-    - send_telegram
-    - write_to_sheet
-    """
 
+# --- MAIN ---
+def execute_action(
+    action: str,
+    customer_id: str,
+    churn_score: float,
+    row_data: dict | None = None
+) -> dict:
+
+    # ---------------- EMAIL ----------------
     if action == "send_email":
-        if USE_REAL_SERVICES:
-            subject = f"Atencion cliente {customer_id}"
-            body = f"Estimado equipo, el cliente {customer_id} tiene churn score {churn_score}."
-            result = send_email(subject, body)
-            return {"status": "email sent", "result": result}
-        else:
-            return {"status": "email sent (mock)", "customer": customer_id}
+        subject = f"Atención cliente {customer_id}"
+        body = f"Cliente {customer_id} con churn score {churn_score}"
 
-    elif action == "schedule_meeting":
-        start = (datetime.utcnow() + timedelta(hours=24)).isoformat() + "Z"
-        end = (datetime.utcnow() + timedelta(hours=25)).isoformat() + "Z"
-        attendees = [os.getenv("GMAIL_RECIPIENT")] if os.getenv("GMAIL_RECIPIENT") else []
         if USE_REAL_SERVICES:
-            event = create_calendar_event(
-                summary=f"Retention meeting: {customer_id}",
-                description=f"Evento generado automáticamente para retención del cliente {customer_id}",
-                start=start,
-                end=end,
-                attendees=attendees
-            )
-            return {"status": "calendar event created", "event": event}
-        else:
-            return {"status": "calendar event created (mock)", "customer": customer_id}
-        
-    elif action == "send_telegram":
-        text = f"🚨 Cliente {customer_id} con churn alto ({churn_score})"
-        text = escape_telegram_text(text)  # <-- escapamos caracteres especiales
+            result = send_email(subject, body)
+            return {"status": "email_sent", "result": result}
+
+        return {"status": "email_mock"}
+
+    # ---------------- TELEGRAM ----------------
+    if action == "send_telegram":
+        text = escape_telegram_text(
+            f"🚨 Cliente {customer_id} con churn alto ({churn_score})"
+        )
+
         if USE_REAL_SERVICES and telegram_enabled():
             result = send_telegram_message(text)
-            return {"status": "telegram message sent", "result": result}
-        else:
-            return {"status": "telegram message sent (mock)", "customer": customer_id}
+            return {"status": "telegram_sent", "result": result}
 
-    elif action == "write_to_sheet":
-        if USE_REAL_SERVICES and row_data:
-     
-            values = [list(row_data.keys()), list(row_data.values())]
-            
-            result = write_to_sheet("Sheet1!A1", values)
+        return {"status": "telegram_mock"}
 
-            return {"status": "sheet updated", "result": result}
-        else:
-            return {"status": "sheet updated (mock)", "customer": customer_id}
+    # ---------------- MEET + CALENDAR + EMAIL + AUDIT ----------------
+    if action == "schedule_meeting_with_meet":
 
+        start = (datetime.utcnow() + timedelta(hours=24)).isoformat() + "Z"
+        end = (datetime.utcnow() + timedelta(hours=25)).isoformat() + "Z"
+
+        attendees = [os.getenv("GMAIL_RECIPIENT")]
+
+        # 1️⃣ Calendar + Meet
+        event = create_event_with_meet(
+            summary=f"Retention sync: {customer_id}",
+            description=f"Churn score: {churn_score}",
+            start=start,
+            end=end,
+            attendees=attendees
+        )
+
+        meet_link = (
+            event.get("conferenceData", {})
+                 .get("entryPoints", [{}])[0]
+                 .get("uri")
+        )
+
+        # 2️⃣ Email con link
+        send_email(
+            subject=f"[Retention] Meeting {customer_id}",
+            body=f"""
+Hola,
+
+Cliente {customer_id} con churn score {churn_score}
+
+📅 Evento creado
+🎥 Google Meet:
+{meet_link}
+
+Saludos
+Auto Retention Agent
+"""
+        )
+
+        audit_row = [
+            datetime.utcnow().isoformat(),
+            customer_id,
+            churn_score,
+            "schedule_meeting_with_meet",
+            meet_link
+        ]
+
+        # Auditoría en Sheets
+
+        append_to_sheet(
+            spreadsheet_id=os.getenv("SPREADSHEET_ID"),
+            range_name="Sheet1!A:A",
+            values=[audit_row]
+        )
+
+
+        return {
+            "status": "meet_created",
+            "meet_link": meet_link,
+            "event_id": event.get("id")
+        }
+
+    # ---------------- DEFAULT ----------------
+    return {
+        "status": "no_action",
+        "action_received": action
+    }
