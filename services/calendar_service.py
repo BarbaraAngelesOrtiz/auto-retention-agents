@@ -3,14 +3,14 @@
 import os
 
 class CalendarService:
-    """Interfaz para servicios de calendario."""
+    """Interface for calendar services."""
 
     def create_meeting(self, title: str, datetime: str, participants: list):
-        raise NotImplementedError("Debe implementar la función en subclase.")
+        raise NotImplementedError("You must implement the function in a subclass.")
 
 
 class MockCalendarService(CalendarService):
-    """Mock para pruebas locales."""
+    """Mock for local testing."""
 
     def create_meeting(self, title: str, datetime: str, participants: list):
         meeting_id = "MOCK-12345"
@@ -19,7 +19,7 @@ class MockCalendarService(CalendarService):
 
 
 class MicrosoftCalendarService(CalendarService):
-    """Stub para Microsoft Graph API (implementación futura)."""
+    """Stub for Microsoft Graph API (future implementation)."""
 
     def create_meeting(self, title: str, datetime: str, participants: list):
         # Aquí iría la llamada a Microsoft Graph

@@ -3,10 +3,10 @@ import random
 
 def decide_action(churn_score: float, mode: str = "deterministic") -> str:
     """
-    Decide la acción a tomar según el churn_score.
-    :param churn_score: valor entre 0 y 1
-    :param mode: "deterministic" (por default) o "random"
-    :return: nombre de la acción
+Decide the action to take based on the churn score.
+:param churn_score: value between 0 and 1
+:param mode: "deterministic" (default) or "random"
+:return: name of the action
     """
     if mode == "deterministic":
         if churn_score >= 0.85:
@@ -14,12 +14,12 @@ def decide_action(churn_score: float, mode: str = "deterministic") -> str:
         elif churn_score >= 0.6:
             return "send_email"
         elif churn_score >= 0.4:
-            return "send_telegram"  # nueva acción para clientes con churn medio
+            return "send_telegram"  
         else:
             return "no_action"
     
     elif mode == "random":
-        # Probabilidades según churn_score
+        # Probabilities according to churn_score
         if churn_score >= 0.85:
             return random.choices(
                 ["schedule_meeting_with_meet", "send_email", "send_telegram", "no_action"],

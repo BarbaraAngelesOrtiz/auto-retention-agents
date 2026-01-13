@@ -17,15 +17,15 @@ GMAIL_RECIPIENT = os.getenv("GMAIL_RECIPIENT")
 
 def get_gmail_service():
     creds = None
-    # Si existe token guardado, lo usamos
+    # If a saved token exists, we use it
     if os.path.exists(TOKEN_FILE):
         creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
     
-    # Si no hay token válido, generamos uno
+    # If there is no valid token, we generate one
     if not creds or not creds.valid:
         flow = InstalledAppFlow.from_client_secrets_file(CREDS_FILE, SCOPES)
         creds = flow.run_local_server(port=0)
-        # Guardamos el token para futuros usos
+        # We saved the token for future use
         with open(TOKEN_FILE, "w") as token:
             token.write(creds.to_json())
     

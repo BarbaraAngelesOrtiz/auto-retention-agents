@@ -13,13 +13,13 @@ from agents.telegram_agent import send_telegram_message, telegram_enabled
 
 USE_REAL_SERVICES = True
 
-# --- Util ---
+# Util
 def escape_telegram_text(text: str) -> str:
     escape_chars = r'_*[]()~`>#+-=|{}.!'
     return re.sub(f"([{re.escape(escape_chars)}])", r"\\\1", text)
 
 
-# --- MAIN ---
+# MAIN 
 def execute_action(
     action: str,
     customer_id: str,
@@ -27,10 +27,10 @@ def execute_action(
     row_data: dict | None = None
 ) -> dict:
 
-    # ---------------- EMAIL ----------------
+    # EMAIL
     if action == "send_email":
-        subject = f"Atención cliente {customer_id}"
-        body = f"Cliente {customer_id} con churn score {churn_score}"
+        subject = f"Customer service {customer_id}"
+        body = f"Customer {customer_id} with churn score {churn_score}"
 
         if USE_REAL_SERVICES:
             result = send_email(subject, body)
@@ -38,10 +38,10 @@ def execute_action(
 
         return {"status": "email_mock"}
 
-    # ---------------- TELEGRAM ----------------
+    # TELEGRAM 
     if action == "send_telegram":
         text = escape_telegram_text(
-            f"🚨 Cliente {customer_id} con churn alto ({churn_score})"
+            f"🚨 Customer {customer_id} with churn score ({churn_score})"
         )
 
         if USE_REAL_SERVICES and telegram_enabled():
@@ -50,7 +50,7 @@ def execute_action(
 
         return {"status": "telegram_mock"}
 
-    # ---------------- MEET + CALENDAR + EMAIL + AUDIT ----------------
+    # MEET + CALENDAR + EMAIL + AUDIT 
     if action == "schedule_meeting_with_meet":
 
         start = (datetime.utcnow() + timedelta(hours=24)).isoformat() + "Z"
@@ -58,7 +58,7 @@ def execute_action(
 
         attendees = [os.getenv("GMAIL_RECIPIENT")]
 
-        # 1️⃣ Calendar + Meet
+        # Calendar + Meet
         event = create_event_with_meet(
             summary=f"Retention sync: {customer_id}",
             description=f"Churn score: {churn_score}",
@@ -73,19 +73,19 @@ def execute_action(
                  .get("uri")
         )
 
-        # 2️⃣ Email con link
+        # Email + link
         send_email(
             subject=f"[Retention] Meeting {customer_id}",
             body=f"""
-Hola,
+Hi,
 
-Cliente {customer_id} con churn score {churn_score}
+Customer {customer_id} with churn score  {churn_score}
 
-📅 Evento creado
+📅 Event created
 🎥 Google Meet:
 {meet_link}
 
-Saludos
+Regards,
 Auto Retention Agent
 """
         )
@@ -98,7 +98,7 @@ Auto Retention Agent
             meet_link
         ]
 
-        # Auditoría en Sheets
+        # Audit log in Sheets
 
         append_to_sheet(
             spreadsheet_id=os.getenv("SPREADSHEET_ID"),
@@ -113,7 +113,7 @@ Auto Retention Agent
             "event_id": event.get("id")
         }
 
-    # ---------------- DEFAULT ----------------
+    # DEFAULT
     return {
         "status": "no_action",
         "action_received": action

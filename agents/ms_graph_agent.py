@@ -34,7 +34,7 @@ def get_access_token():
 def ms_graph_healthcheck():
     token = get_access_token()
     headers = {"Authorization": f"Bearer {token}"}
-    user_email = os.getenv("MS_USER_EMAIL")  # debe ser el UPN completo
+    user_email = os.getenv("MS_USER_EMAIL")  
     url = f"https://graph.microsoft.com/v1.0/users/{user_email}"
     r = test_api.get(url, headers=headers)
     return {
@@ -45,15 +45,15 @@ def ms_graph_healthcheck():
 
 def create_calendar_event(subject: str, body: str, start: str, end: str):
     """
-    Crea un evento simple en el calendario del usuario (Outlook / Graph)
-    start / end en formato ISO 8601: 2026-01-08T15:00:00
+    Create a simple event in the user's calendar (Outlook/Graph)
+    Start/End in ISO 8601 format: 2026-01-08T15:00:00
     """
 
     token = get_access_token()
     if not token:
         return {"error": "Microsoft Graph not configured"}
 
-    MS_USER_EMAIL = os.getenv("MS_USER_EMAIL")  # <- Asegurarse de definirlo aquí
+    MS_USER_EMAIL = os.getenv("MS_USER_EMAIL") 
     if not MS_USER_EMAIL:
         return {"error": "MS_USER_EMAIL no definido"}
 

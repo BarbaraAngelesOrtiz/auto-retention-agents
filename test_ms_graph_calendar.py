@@ -8,11 +8,11 @@ from datetime import datetime, timedelta, timezone
 start = (datetime.now(timezone.utc) + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S")
 end = (datetime.now(timezone.utc) + timedelta(hours=2)).strftime("%Y-%m-%dT%H:%M:%S")
 
-subject = "Evento de prueba desde Python"
-body = "Este evento se creó automáticamente con Microsoft Graph API."
+subject = "Test event from Python"
+body = "This event was automatically created using the Microsoft Graph API."
 
 try:
     result = create_calendar_event(subject=subject, body=body, start=start, end=end)
     print("Calendar Event Result:", result)
 except Exception as e:
-    print("Error creando evento:", e)
+    print("Error creating event:", e)

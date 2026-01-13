@@ -6,10 +6,9 @@ from agents.google_sheets_agent import write_to_sheet
 import os
 from datetime import datetime
 
-# --- Datos de prueba ---
-spreadsheet_id = os.getenv("SPREADSHEET_ID")  # debe estar en tu .env
+spreadsheet_id = os.getenv("SPREADSHEET_ID")  
 if not spreadsheet_id:
-    raise ValueError("SPREADSHEET_ID no definido en .env")
+    raise ValueError("SPREADSHEET_ID not defined in .env")
 
 row = [
     datetime.utcnow().isoformat(),
@@ -18,13 +17,12 @@ row = [
     "test_sheet_write"
 ]
 
-# write_to_sheet espera lista de listas
+# write_to_sheet expects list of lists
 values = [row]
 
-# --- Ejecutar ---
 result = write_to_sheet(
     range_name="Sheet1!A1",
     values=values
 )
 
-print("Resultado de escritura en Sheets:", result)
+print("Result of writing in Sheets:", result)

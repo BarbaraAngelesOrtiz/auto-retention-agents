@@ -9,7 +9,7 @@ from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-# ======== CARGAR CREDENCIALES ========
+# LOAD CREDENTIALS
 GMAIL_CLIENT_ID = os.getenv("GMAIL_CLIENT_ID")
 GMAIL_CLIENT_SECRET = os.getenv("GMAIL_CLIENT_SECRET")
 GMAIL_REFRESH_TOKEN = os.getenv("GMAIL_REFRESH_TOKEN")
@@ -36,9 +36,9 @@ def get_credentials():
     creds.refresh(Request())
     return creds
 
-# ======== GMAIL ========
+# GMAIL
 def send_gmail_message(to: str, subject: str, body: str):
-    """Envía un correo usando Gmail API"""
+    """Send an email using the Gmail API"""
     try:
         import base64
         from email.mime.text import MIMEText
@@ -60,9 +60,9 @@ def send_gmail_message(to: str, subject: str, body: str):
     except HttpError as e:
         return {"status": "error", "error": str(e)}
 
-# ======== CALENDAR ========
+# CALENDAR
 def create_calendar_event(title: str, description: str, start: str, end: str, attendees=None):
-    """Crea un evento en Google Calendar"""
+    """Create an event in Google Calendar"""
     try:
         creds = get_credentials()
         service = build('calendar', 'v3', credentials=creds)
@@ -81,9 +81,9 @@ def create_calendar_event(title: str, description: str, start: str, end: str, at
     except HttpError as e:
         return {"status": "error", "error": str(e)}
 
-# ======== SPREADSHEET ========
+# SPREADSHEET 
 def append_to_spreadsheet(row_data: dict):
-    """Agrega una fila a Google Sheets"""
+    """Add a row to Google Sheets"""
     try:
         creds = get_credentials()
         service = build('sheets', 'v4', credentials=creds)
@@ -99,9 +99,9 @@ def append_to_spreadsheet(row_data: dict):
     except HttpError as e:
         return {"status": "error", "error": str(e)}
 
-# ======== GOOGLE DOCS ========
+# GOOGLE DOCS 
 def create_doc(title: str, content: str):
-    """Crea un documento en Google Docs"""
+    """Create a document in Google Docs"""
     try:
         creds = get_credentials()
         service = build('docs', 'v1', credentials=creds)
@@ -115,15 +115,16 @@ def create_doc(title: str, content: str):
     except HttpError as e:
         return {"status": "error", "error": str(e)}
 
-# ======== GOOGLE SLIDES ========
+# GOOGLE SLIDES 
 def create_slide(title: str, content: str):
-    """Crea una presentación en Google Slides"""
+    """Create a presentation in Google Slides"""
     try:
         creds = get_credentials()
         service = build('slides', 'v1', credentials=creds)
         presentation = service.presentations().create(body={"title": title}).execute()
         pres_id = presentation['presentationId']
-        # agregar primer slide con título y contenido
+        
+        # Add first slide with title and content
         service.presentations().batchUpdate(
             presentationId=pres_id,
             body={"requests": [

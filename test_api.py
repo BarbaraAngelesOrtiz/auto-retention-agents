@@ -42,7 +42,7 @@ def test_run_batch_real():
 if __name__ == "__main__":
     test_healthcheck()
     test_sample_customer()
-    test_run_customer("C0")  # Cambiá por un customer_id válido de tu CSV
-    test_run_batch(3)        # Probamos batch de 3 clientes
+    test_run_customer("C0")  # Replace with a valid customer_id from the CSV
+    test_run_batch(3)        # We tested a batch of 3 customers
     test_run_batch_real()
 

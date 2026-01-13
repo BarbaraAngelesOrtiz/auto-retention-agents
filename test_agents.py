@@ -8,7 +8,7 @@ from agents.action_agent import execute_action
 from agents.scoring_agent import calculate_churn_score
 
 CSV_PATH = "data/Grocery_Customer_Churn_Data_Augmented.csv"
-MAX_CUSTOMERS = 5    # para no spamear Calendar / Email
+MAX_CUSTOMERS = 5    
 CHURN_THRESHOLD = 0.6
 
 
@@ -27,17 +27,17 @@ def run_system_test():
         print("-" * 40)
         print(f"Customer: {customer_id}")
 
-        # 1️⃣ Calcular churn score
+        # Calculate churn score
         row_dict = row.to_dict()
         churn_score = calculate_churn_score(row_dict)
 
         print(f"Churn score: {round(churn_score, 3)}")
 
-        # 2️⃣ Decidir acción
+        # Decide on action
         action = decide_action(churn_score)
         print(f"Decided action: {action}")
 
-        # 3️⃣ Ejecutar acción
+        # Execute action
         if action != "no_action":
             try:
                 result = execute_action(

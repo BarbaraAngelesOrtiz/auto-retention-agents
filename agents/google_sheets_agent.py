@@ -22,7 +22,7 @@ def get_sheets_service():
     return service
 
 def write_to_sheet(spreadsheet_id: str, range_name: str, values: list[list]):
-    """Sobrescribe valores en un rango específico"""
+    """Overwrite values ​​in a specific range"""
     service = get_sheets_service()
     body = {"values": values}
     result = service.spreadsheets().values().update(
@@ -34,7 +34,7 @@ def write_to_sheet(spreadsheet_id: str, range_name: str, values: list[list]):
     return result
 
 def append_to_sheet(spreadsheet_id: str, range_name: str, values: list[list]):
-    """Agrega valores al final de la hoja"""
+    """Add values ​​to the end of the sheet"""
     service = get_sheets_service()
     body = {"values": values}
     result = service.spreadsheets().values().append(

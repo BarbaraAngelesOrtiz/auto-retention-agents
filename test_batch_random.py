@@ -9,7 +9,7 @@ from agents.decision_agent import decide_action
 from agents.action_agent import execute_action
 
 CSV_PATH = "data/Grocery_Customer_Churn_Data_Augmented.csv"
-BATCH_SIZE = 5  # cuántos clientes probar por corrida
+BATCH_SIZE = 5  
 
 def clean_row(row: dict) -> dict:
     """Limpia NaN para evitar errores en Sheets / JSON"""
@@ -25,13 +25,13 @@ def run_batch_random(limit=BATCH_SIZE):
     for _, row in df.iterrows():
         row_dict = clean_row(row.to_dict())
 
-        # Simulamos churn_score random si no existe
+        # Random churn_score simulation if it does not exist
         churn_score = round(random.random(), 2)
 
-        # Decidimos acción aleatoria
+        # Random action decision
         action = decide_action(churn_score, mode="random")
 
-        # Ejecutamos la acción real (Meet, Email, Sheets, Telegram)
+        # Execution of the real action (Meet, Email, Sheets, Telegram)
         result = execute_action(
             action=action,
             customer_id=row_dict["customer_id"],
@@ -39,7 +39,7 @@ def run_batch_random(limit=BATCH_SIZE):
             row_data=row_dict
         )
 
-        # Guardamos info resumida
+        # We saved summary information
         results.append({
             "customer_id": row_dict["customer_id"],
             "churn_score": churn_score,

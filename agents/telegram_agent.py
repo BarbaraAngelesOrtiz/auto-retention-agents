@@ -5,11 +5,11 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 def telegram_enabled() -> bool:
-    """Verifica si Telegram está configurado correctamente"""
+    """Check if Telegram is set up correctly"""
     return all([TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID])
 
 def send_telegram_message(text: str) -> dict:
-    """Envía un mensaje por Telegram"""
+    """Send a message via Telegram."""
     if not telegram_enabled():
         return {"ok": False, "error": "Telegram not configured"}
 
@@ -17,7 +17,7 @@ def send_telegram_message(text: str) -> dict:
     payload = {
         "chat_id": TELEGRAM_CHAT_ID,
         "text": text,
-        "parse_mode": "MarkdownV2"  # opcional
+        "parse_mode": "MarkdownV2"  
     }
     response = requests.post(url, json=payload)
 

@@ -5,14 +5,14 @@ load_dotenv()
 import pandas as pd
 import numpy as np
 
-from agents.scoring_agent import calculate_churn_score # tu función que genera probabilidades
+from agents.scoring_agent import calculate_churn_score 
 from agents.decision_agent import decide_action
 from agents.action_agent import execute_action
 
 CSV_PATH = "data/Grocery_Customer_Churn_Data_Augmented.csv"
-BATCH_SIZE = 5  # cantidad de clientes a testear
+BATCH_SIZE = 5  # number of customers to test
 
-# 1️⃣ Cargar clientes
+# Data ingestion
 df = pd.read_csv(CSV_PATH).head(BATCH_SIZE)
 
 results = []
@@ -20,14 +20,14 @@ results = []
 for _, row in df.iterrows():
     customer_id = row["customer_id"]
 
-    # 2️⃣ Simular churn_score si no lo tenés
-    churn_score = calculate_churn_score(row)  # devuelve un float entre 0 y 1
+    # Simulate churn_score 
+    churn_score = calculate_churn_score(row)  # returns a float between 0 and 1
     churn_score = round(churn_score, 2)
 
-    # 3️⃣ Decidir acción
+    # Decide on action
     action = decide_action(churn_score)
 
-    # 4️⃣ Ejecutar acción (email, meet, telegram, sheet)
+    # Execute action (email, meet, telegram, sheet)
     result = execute_action(
         action=action,
         customer_id=customer_id,
@@ -42,6 +42,6 @@ for _, row in df.iterrows():
         "result": result
     })
 
-# 5️⃣ Mostrar resultados
+# Show results
 for r in results:
     print(r)

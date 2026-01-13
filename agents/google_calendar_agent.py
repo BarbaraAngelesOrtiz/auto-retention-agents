@@ -29,7 +29,7 @@ def get_calendar_service():
             try:
                 creds = pickle.load(token)
             except EOFError:
-                creds = None  # si el token está vacío, se regenerará
+                creds = None  # If the token is empty, it will be regenerated
 
     if not creds:
         flow = InstalledAppFlow.from_client_secrets_file(CREDS_FILE, SCOPES)
