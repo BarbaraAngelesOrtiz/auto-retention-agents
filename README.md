@@ -22,6 +22,8 @@ Given a customer and a **churn score** (simulated or real), the system:
 
 ## 🏗️ Architecture Overview
 
+```bash
+
 ┌───────────────┐
 │ FastAPI API   │
 └───────┬───────┘
@@ -44,6 +46,7 @@ Given a customer and a **churn score** (simulated or real), the system:
 │ • Google Sheets (audit log)              │
 │ • Telegram Bot                           │
 └──────────────────────────────────────────┘
+```
 
 ---
 
@@ -392,7 +395,7 @@ This mimics a scheduler-triggered execution (cron / Airflow).
 [LinkedIn](https://www.linkedin.com/in/barbaraangelesortiz/) | 
 
 
-![Status](https://img.shields.io/badge/status-in process-brightgreen) 📅 January 2026
+![Status](https://img.shields.io/badge/status-in-process-brightgreen) 📅 January 2026
 
 ![Python](https://img.shields.io/badge/python-3.10-blue)
 ![Pandas](https://img.shields.io/badge/pandas-2.1.0-blue)
