@@ -2,12 +2,12 @@
 
 ## Multi-Agent Churn Response System (FastAPI, Batch, Real Integrations, GitHub Actions)
 
-A Python-based multi-agent system designed to analyze churn risk at scale (4k–5k customers) and orchestrate business-aware retention decisions, combining:
+A Python-based multi-agent system designed to analyze churn risk at scale (4k customers) and orchestrate business-aware retention decisions, combining:
 
 * Batch processing from CSV (model outputs)
 * Manager-level summaries & insights
 * Selective real-world actions (Email, Calendar, Telegram)
-* FastAPI for interactive demos (single-customer simulation)
+* FastAPI for interactive demos 
 * Production-oriented design (dry-run, feature flags, schedulers)
 
 This project is intentionally manager-first: instead of spamming thousands of customers, it focuses on decision transparency, aggregation, and operational realism.
@@ -34,7 +34,7 @@ Given a CSV containing customer data + churn probability (produced by an ML mode
 
                       ┌────────────────────┐
                       │ CSV Churn Data     │
-                      │ (4.000 users)│
+                      │ (4.000 users)      │
                       └─────────┬──────────┘
                                 │
                                 ▼
@@ -77,7 +77,6 @@ Given a CSV containing customer data + churn probability (produced by an ML mode
                 └──────────────────────────────┘
           
 ```
-
 ---
 
 ## 📊 Dataset
@@ -89,11 +88,9 @@ Given a CSV containing customer data + churn probability (produced by an ML mode
 
 ---
 
-## 🤖 Decision Logic (Non‑Random)
-
+## 🤖 Decision Logic 
 
 Decisions are **deterministic** and **explainable**, based on churn probability after the .joblib model:
-
 
 | Churn Probability | Decision Type | Meaning |
 |-------------------|----------------------------|--------|
@@ -102,13 +99,37 @@ Decisions are **deterministic** and **explainable**, based on churn probability 
 | 0.30 – 0.49 | LOYALTY_ENGAGEMENT | Soft engagement |
 | < 0.30 | NO_ACTION | No intervention |
 
-
 This makes the system:
 
 - Predictable
 - Auditable
 - Manager‑friendly
 - Suitable for real operations
+
+### Customer Retention Decision Matrix 
+
+| Churn Risk      | Value | Flags                     | Suggested Action                                    | Urgency  |
+|-----------------|-------|---------------------------|---------------------------------------------------|----------|
+| High (>0.7)     | High  | INACTIVITY_RISK           | Urgent call + exclusive benefit + dedicated AM   | CRITICAL |
+| High (>0.6)     | High  | FINANCIAL_RISK            | Meeting with account manager + personalized plan | CRITICAL |
+| High (>0.6)     | High  | PROMO_ABUSE               | Retention call + upgrade to premium loyalty      | HIGH     |
+| High (>0.6)     | Medium| INACTIVITY_RISK           | Personalized email + reactivation coupon        | HIGH     |
+| High (>0.6)     | Medium| FINANCIAL_RISK            | Automated email + financing / installment       | HIGH     |
+| High (>0.6)     | Medium| PROMO_ABUSE               | Points program email + non-monetary benefits    | MEDIUM   |
+| High (>0.6)     | Low   | INACTIVITY_RISK           | Automated reactivation email + moderate discount | MEDIUM   |
+| High (>0.5)     | Low   | FINANCIAL_RISK            | Email with budget products + referral program   | MEDIUM   |
+| High (>0.6)     | Low   | PROMO_ABUSE               | Product education email + one-time discount     | MEDIUM   |
+| Low (<0.3)      | High  | None                      | Automatic VIP program + early access + events   | LOW      |
+| Medium (0.3-0.5)| High  | Any                       | Proactive check-in + surprise + feedback        | LOW      |
+| Special Cases   | Custom| PROMO_ABUSE / FINANCIAL_RISK / other | Personalized actions based on profile        | LOW-MEDIUM-HIGH |
+
+🔴 CRITICAL
+
+🟠 HIGH
+
+🟡 MEDIUM
+
+🟢 LOW
 
 ---
 
@@ -143,10 +164,33 @@ Responsibilities:
 
 For `REQUIRES_HUMAN_CONTACT`:
 
-
 - 📧 Email notification
 - 📅 Calendar meeting (+ Meet link)
 - 📊 Google Sheets audit
+
+---
+
+## 📌 Action Channels
+
+The Action Agent executes each customer action through a single orchestrator (execute_action()), triggering the appropriate channel depending on churn risk:
+
+* Email: Sends personalized or summary emails to managers.
+
+![Google Agent](images/Gmail and Meet.png)
+
+![Google Agent](images/Gmail Summary.png)
+
+* Calendar: Schedules meetings and generates Google Meet links for high-risk customers.
+
+![Google Agent](images/Calendar and Meet.png)
+
+* Telegram : Sends critical alerts or engagement messages via the Telegram bot.
+
+![Telegram Agent](images/Telegram.png)
+
+* Audit Sheet: Logs actions and manager summaries in Google Sheets for auditing and reporting.
+
+![Google Agent](images/Sheet Audit log.png)
 
 ---
 
