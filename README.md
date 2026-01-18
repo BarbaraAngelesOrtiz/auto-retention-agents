@@ -146,12 +146,6 @@ This makes the system:
 
 ## ⚙️ Action Agent (Core Orchestrator)
 
-All executions go through:
-
-```python
-execute_action(decision)
-```
-
 Responsibilities:
 
 - Channel selection (email / calendar / telegram / audit)
@@ -176,13 +170,13 @@ The Action Agent executes each customer action through a single orchestrator (ex
 
 * Email: Sends personalized or summary emails to managers.
 
-![Google Agent](images/Gmail and Meet.png)
+![Google Agent](images/Gmail_and_Meet.png)
 
-![Google Agent](images/Gmail Summary.png)
+![Google Agent](images/Gmail_Summary.png)
 
 * Calendar: Schedules meetings and generates Google Meet links for high-risk customers.
 
-![Google Agent](images/Calendar and Meet.png)
+![Google Agent](images/Calendar_and_Meet.png)
 
 * Telegram : Sends critical alerts or engagement messages via the Telegram bot.
 
