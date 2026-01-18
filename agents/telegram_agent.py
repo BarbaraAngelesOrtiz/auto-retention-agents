@@ -1,27 +1,35 @@
-import os
-import requests
+# agents/telegram_agent.py
 
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+import requests
+import html
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 def telegram_enabled() -> bool:
-    """Check if Telegram is set up correctly"""
-    return all([TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID])
+    return bool(TELEGRAM_TOKEN and TELEGRAM_CHAT_ID)
+
+def escape_telegram_text(text: str) -> str:
+    return html.escape(text)
 
 def send_telegram_message(text: str) -> dict:
-    """Send a message via Telegram."""
     if not telegram_enabled():
-        return {"ok": False, "error": "Telegram not configured"}
+        return {"status": "skipped", "reason": "Telegram not configured"}
 
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {
         "chat_id": TELEGRAM_CHAT_ID,
-        "text": text,
-        "parse_mode": "MarkdownV2"  
+        "text": escape_telegram_text(text),
+        "parse_mode": "HTML"
     }
-    response = requests.post(url, json=payload)
 
     try:
-        return response.json()
-    except Exception:
-        return {"ok": False, "error": "Failed to parse response from Telegram"}
+        response = requests.post(url, json=payload, timeout=10)
+        response.raise_for_status()
+        return {"status": "ok", "response": response.json()}
+    except requests.exceptions.RequestException as e:
+        return {"status": "error", "error": str(e)}

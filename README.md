@@ -1,22 +1,30 @@
 # 🚀 Auto Retention Agents  
 
-## Multi-Agent Churn Response System (FastAPI + Real Integrations)
+## Multi-Agent Churn Response System (FastAPI, Batch, Real Integrations, GitHub Actions)
 
-A **Python-based multi-agent system** that simulates and executes **automated customer retention actions** based on churn risk, integrating **real-world services** (Google APIs, Telegram, Email) and exposing the orchestration via **FastAPI** through batch endpoints.
+A Python-based multi-agent system designed to analyze churn risk at scale (4k–5k customers) and orchestrate business-aware retention decisions, combining:
 
-This project is designed as a **realistic workplace simulation**, focusing on **decision automation, agent orchestration, and production-oriented architecture**.
+* Batch processing from CSV (model outputs)
+* Manager-level summaries & insights
+* Selective real-world actions (Email, Calendar, Telegram)
+* FastAPI for interactive demos (single-customer simulation)
+* Production-oriented design (dry-run, feature flags, schedulers)
+
+This project is intentionally manager-first: instead of spamming thousands of customers, it focuses on decision transparency, aggregation, and operational realism.
 
 ---
 
 ## 🧠 What does this system do?
 
-Given a customer and a **churn score** (simulated or real), the system:
+Given a CSV containing customer data + churn probability (produced by an ML model), the system:
 
-1. Evaluates churn risk  
-2. Decides the best retention action  
-3. Executes **real integrations**  
-4. Logs and audits the action  
-5. Exposes everything via API and batch execution  
+1. Processes thousands of customers in batch
+2. Classifies churn risk into business decisions
+3. Generates a manager summary (counts, categories, examples)
+4. Logs results to Google Sheets (audit & reporting)
+5. Sends a single manager email with insights
+6. Optionally triggers real actions for a small sample of customers
+7. Exposes a FastAPI layer for demos and testing
 
 ---
 
@@ -24,28 +32,50 @@ Given a customer and a **churn score** (simulated or real), the system:
 
 ```bash
 
-┌───────────────┐
-│ FastAPI API   │
-└───────┬───────┘
-        │
-        ▼
-┌───────────────────┐
-│ Decision Agent    │ ← rules 
-└───────┬───────────┘
-        │
-        ▼
-┌───────────────────┐
-│ Action Agent      │ ← single execution point
-└───────┬───────────┘
-        │
-        ▼
-┌──────────────────────────────────────────┐
-│ Real Integrations (feature-flagged)      │
-│ • Gmail                                  │
-│ • Google Calendar + Meet                 │
-│ • Google Sheets (audit log)              │
-│ • Telegram Bot                           │
-└──────────────────────────────────────────┘
+                      ┌────────────────────┐
+                      │ CSV Churn Data     │
+                      │ (4.000 users)│
+                      └─────────┬──────────┘
+                                │
+                                ▼
+                      ┌────────────────────┐
+                      │ Feature Loader /   │
+                      │ Data Preprocessing │
+                      └─────────┬──────────┘
+                                │
+                                ▼
+                      ┌────────────────────┐
+                      │ Decision Agent     │
+                      │ decide_action()    │
+                      │ batch_decisions()  │
+                      └─────────┬──────────┘
+                                │                 
+                                │
+                                ▼
+                      ┌────────────────────┐
+                      │ manager_summary    │
+                      │ (aggregated counts)│
+                      └─────────┬──────────┘
+                                │
+                                ▼
+                      ┌────────────────────┐
+                      │ Action Agent       │
+                      │ (Orchestrator)     │
+                      └─────────┬──────────┘
+                                │
+       ┌─────────────┬──────────┼─────────────┐
+       ▼             ▼          ▼             ▼
+ ┌──────────┐ ┌──────────┐ ┌──────────┐  ┌────────────────────┐
+ │ Email    │ │ Calendar │ │ Telegram │  │ Sheets Audit Log   │          
+ │ Summary  │ │ Strategy │ │ Alerts   │  │ (per customer)     │
+ └──────────┘ └──────────┘ └──────────┘  └────────────────────┘
+                                ▲
+                                │
+                ┌──────────────────────────────┐
+                │ FastAPI (Demo Layer)         │
+                │ single‑customer simulation   │
+                └──────────────────────────────┘
+          
 ```
 
 ---
@@ -54,90 +84,69 @@ Given a customer and a **churn score** (simulated or real), the system:
 
 - Real supermarket customer dataset  
 - Demographic + transactional variables  
-- The dataset **does not include churn probability**
-- A **churn score simulation** is used for realistic testing  
+- **Churn probability already computed** by an external ML model
+- The system **does not train models**, it consumes model outputs
 
 ---
 
-## 🔮 Churn Score Simulation
+## 🤖 Decision Logic (Non‑Random)
 
-When churn probability is not available:
 
-bash```python
-churn_score = round(random.random(), 2) ```
+Decisions are **deterministic** and **explainable**, based on churn probability after the .joblib model:
 
-This allows:
 
-* End-to-end pipeline testing
-* Realistic decision automation
-* Batch and scheduler simulations
+| Churn Probability | Decision Type | Meaning |
+|-------------------|----------------------------|--------|
+| ≥ 0.70 | REQUIRES_HUMAN_CONTACT | High risk – escalation |
+| 0.50 – 0.69 | AUTOMATED_PROMO | Automated retention |
+| 0.30 – 0.49 | LOYALTY_ENGAGEMENT | Soft engagement |
+| < 0.30 | NO_ACTION | No intervention |
 
-In production, this will be replaced by a trained ML model; (models/churn_model.pkl) 
+
+This makes the system:
+
+- Predictable
+- Auditable
+- Manager‑friendly
+- Suitable for real operations
 
 ---
 
-## 🤖 Agents
+## 👥 Manager Actions 
 
-### Decision Agent
-
-Determines which action to execute based on:
-
-* churn_score
-
-* execution mode:
-
-   * deterministic
-   * probabilistic (randomized decisions)
-
-### Possible actions:
-
-* schedule_meeting_with_meet
-* send_email
-* send_telegram
-* no_action
+- Aggregated churn distribution
+- Counts per decision category
+- Example customers per category
+- Google Sheet row
+- Single email summary
+- Optional calendar sync (review meetings)
 
 ---
 
 ## ⚙️ Action Agent (Core Orchestrator)
 
-### 👉 All actions are triggered from a single method:
+All executions go through:
 
-bash```python
-execute_action()```
+```python
+execute_action(decision)
+```
 
 Responsibilities:
 
-* Orchestrates all downstream agents
-* Applies feature flags
-* Handles failures and fallbacks
-* Executes real-world integrations
+- Channel selection (email / calendar / telegram / audit)
+- Feature flags (real vs dry-run)
+- OAuth handling & refresh
+- Failure isolation
+- Audit logging
 
-### 📅 High Churn Flow (≥ 0.85)
+### Example High‑Risk Flow
 
-For high churn customers, the system automatically executes:
+For `REQUIRES_HUMAN_CONTACT`:
 
-📅 Google Calendar event
 
-🎥 Google Meet generation
-
-✉️ Automatic email with meeting link
-
-📊 Action audit logged in Google Sheets
-
-| Service         | Status |
-| --------------- | ------ |
-| Gmail           | ✅ Real |
-| Google Calendar | ✅ Real |
-| Google Meet     | ✅ Real |
-| Google Sheets   | ✅ Real |
-| Telegram Bot    | ✅ Real |
-
-Features:
-
-* OAuth 2.0 authentication
-* Token refresh handling
-* Controlled failures
-* Feature-flag enable/disable
+- 📧 Email notification
+- 📅 Calendar meeting (+ Meet link)
+- 📊 Google Sheets audit
 
 ---
 
@@ -150,119 +159,85 @@ Features:
 * Telegram message
 * No action
 
-✅ API Tests
+✅ API Tests (Demo Layer)
 
-* GET /
-* GET /customers/sample
-* POST /run-batch
+FastAPI endpoints used for **simulation and demos**:
 
-✅ Batch Execution
+- `GET /`  healthcheck
+- `GET /customers/sample`  sample input
+- `POST /run-batch`  limited batch execution
 
-* Multiple customers
-* Random churn simulation
-* Real integrations enabled
+✅ Batch Execution Tests
+
+Validate batch behavior with CSV inputs:
+
+- Multiple customers (4k–5k scale)
+- Deterministic churn-based decisions (non-random)
+- Real integrations enabled (email, sheets, calendar)
 
 ✅ Scheduler Simulation
 
-* Daily execution simulation
-* Prepared for Airflow or cron-based orchestration
+* Manual execution 
+* Prepared for GitHub Actions
 
-✅ Controlled Error Tests
+✅ Controlled Error & Failure Tests
 
-* Expired OAuth token
-* Missing Google Sheet
-* Telegram API failure
-* Disabled services via feature flags
+Explicit testing of failure scenarios:
+
+- Expired OAuth tokens
+- Missing Google Sheet
+- Telegram API failures
+- Disabled services via feature flags
 
 ---
 
-## 🌐 FastAPI Endpoints
+## 🌐 FastAPI (Demo Layer)
 
-* Healthcheck
-```
-GET /
-```
-* Sample customer
-```
-GET /customers/sample
-```
-* Run single customer
-```
-POST /run-customer/{customer_id}
-```
-* Run batch
-```
-POST /run-batch?limit=10
-```
-### 🔐 Feature Flags
-```
-USE_REAL_SERVICES = True
-```
+FastAPI exists to **simulate behavior**, not to process massive batches.
 
-Allows:
+Endpoints:
 
-* Mock vs real execution
-* Cost-free local testing
-* Safe failure simulation
+- `GET /` – healthcheck
+- `GET /customers/sample` – demo input
+- `POST /run-customer/{id}` – single‑customer simulation
+- `POST /run-batch?limit=10` – small batch demo
+
+> ⚠️ Real production runs use **batch scripts + schedulers**, not API triggers.
 
 ---
 
 ## 🧱 Tech Stack
 
-* Python 3.12
-* FastAPI
-* Pandas
-* Google APIs (Gmail, Calendar, Sheets, Meet)
-* Telegram Bot API
-* OAuth 2.0
-* Requests
-* python-dotenv
+- Python 3.12
+- Pandas
+- FastAPI
+- Google APIs (Gmail, Calendar, Sheets, Meet)
+- Telegram Bot API
+- OAuth 2.0
+- python-dotenv
+- GitHub Actions (batch automation)
 
 ---
+## 🚧 Next Steps
 
-## 🚧 Planned / Next Steps
-
-### 🎥 Microfodt functions 
-
-Microsoft Graph real
-
-### 🛠️ Apache Airflow
-
-* DAG-based daily orchestration
-* Visual pipeline monitoring
-* Production-style scheduling
-
-### 🧠 Machine Learning Integration
-
-* Replace churn simulation with churn_model.pkl
-* Real-time inference
-
-### ☁️ Cloud Deployment
-
-* GCP, Azure or AWS
-* Secret managers
-* Production scheduler
+- ⏰ GitHub Actions daily execution
+- 🧠 Replace rules with ML explainability layer
+- ☁️ Cloud deployment (GCP / AWS / Azure)
+- 📊 Manager dashboard (BI / Looker / Streamlit)
 
 ---
 
 ## 🎯 Why this project?
 
-This project demonstrates:
+This is **not a toy project**. It demonstrates:
 
-✅ Multi-agent architecture
+- Multi‑agent orchestration
+- Batch‑first, manager‑aware design
+- Real API integrations
+- Production constraints (scale, cost, safety)
+- Clear separation of decision vs execution
 
-✅ Decision automation
-
-✅ Real-world API integrations
-
-✅ Production-oriented design
-
-✅ Failure handling and fallbacks
-
-✅ API + batch execution patterns
-
-It simulates a real customer retention system, not an academic exercise.
-
+It mirrors **how retention systems actually work in companies**.
 ---
 
 ## ▶️ How to Use
@@ -290,7 +265,6 @@ source venv/bin/activate
 
 ```bash
 pip install -r requirements.txt
-pip install -r requirements.txt
 ```
 
 ### 4. Environment variables
@@ -298,22 +272,28 @@ pip install -r requirements.txt
 Create a .env file (never commit it):
 
 ```bash
+
 # Google APIs
-GOOGLE_CLIENT_ID=your_client_id
-GOOGLE_CLIENT_SECRET=your_client_secret
-GOOGLE_REFRESH_TOKEN=your_refresh_token
+GOOGLE_CREDENTIALS_FILE=config/google_credentials.json
+GMAIL_CLIENT_ID=your_client_id
+GMAIL_CLIENT_SECRET=your_client_secret
+GMAIL_REFRESH_TOKEN=your_refresh_token
+
 # Gmail
-SENDER_EMAIL=your_email@gmail.com
+GMAIL_SENDER=your_email@gmail.com
+GMAIL_RECIPIENT=your_email@gmail.com
+
 # Google Sheets
-GOOGLE_SHEET_ID=your_sheet_id
+SPREADSHEET_ID=your_sheet_id
+
 # Telegram
 TELEGRAM_BOT_TOKEN=your_bot_token
 TELEGRAM_CHAT_ID=your_chat_id
-# Feature flags
-USE_REAL_SERVICES=true
-```
 
-You can disable real integrations by setting USE_REAL_SERVICES=false.
+# Others
+DRY_RUN=true
+
+```
 
 ### 5. Run the FastAPI server
 
@@ -336,7 +316,6 @@ python test_batch_random.py
 ```bash
 POST /run-batch?limit=5
 
-
 Example response:
 ```bash
 {
@@ -356,18 +335,20 @@ Example response:
 
 You can test specific flows:
 
-* Email only
-* Email + Calendar + Meet
+* Google APIs: Email + Calendar + Meet
 * Telegram message
-* No action
-
-By adjusting:
-
-* churn score
-* decision mode (deterministic / random)
-* feature flags
 
 ### 9. Simulate daily execution
+
+```bash
+python main.py
+```
+
+Supports:
+
+- `dry_run=True`
+- Limited customer actions
+- Full manager reporting
 
 Use the batch script to simulate a daily run:
 
@@ -386,7 +367,7 @@ This mimics a scheduler-triggered execution (cron / Airflow).
 
 ---
 
-## Authors
+## Author
 
 **Bárbara Ángeles Ortiz**
 

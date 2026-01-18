@@ -3,104 +3,107 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from fastapi import FastAPI
+from typing import Dict, Any, List
+from datetime import datetime, timedelta
 import pandas as pd
-from typing import Dict, Any
 
-from agents.decision_agent import decide_action
+from agents.scoring_agent import predict_churn, assign_flags, compute_economic_value
+from agents.decision_agent1 import decide_action, batch_decisions
 from agents.action_agent import execute_action
 
-CSV_PATH = "data/Grocery_Customer_Churn_Data_Augmented.csv"
-
+# FASTAPI 
 app = FastAPI(
     title="Auto Retention Agents API",
-    description="Sistema multi-agente para churn y retención",
+    description="Multi-agent system for churn and retention",
     version="1.0"
 )
 
-
+# UTILS 
 def clean_row(row: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Limpia NaN para evitar errores en Sheets / JSON
+    Clean NaN to avoid errors in Sheets/JSON
     """
-    clean = {}
-    for k, v in row.items():
-        if pd.isna(v):
-            clean[k] = ""
-        else:
-            clean[k] = v
-    return clean
+    return {k: "" if pd.isna(v) else v for k, v in row.items()}
 
-
+# HEALTHCHECK 
 @app.get("/")
 def healthcheck():
     return {"status": "ok"}
 
-
+# SAMPLE CUSTOMER 
 @app.get("/customers/sample")
 def sample_customer():
+    
+    CSV_PATH = "data/Grocery_Customer_Churn_Data_Augmented.csv"
     df = pd.read_csv(CSV_PATH)
     row = clean_row(df.iloc[0].to_dict())
     return row
 
+# RUN SINGLE CUSTOMER 
+@app.post("/run-customer/")
+def run_customer(customer_data: Dict[str, Any]):
+    """
+    Run the churn and retention flow for a single customer.
+    """
+    row = clean_row(customer_data)
 
-@app.post("/run-customer/{customer_id}")
-def run_customer(customer_id: str):
-    df = pd.read_csv(CSV_PATH)
+    # Churn prediction
+    churn_prob = predict_churn(row)
 
-    customer = df[df["customer_id"] == customer_id]
-    if customer.empty:
-        return {"error": "Customer not found"}
+    # Flags and economic value
+    flags = assign_flags(row, churn_prob)
+    econ_value = compute_economic_value(row)
 
-    row = clean_row(customer.iloc[0].to_dict())
+    # Action decision
+    decision = decide_action(row, churn_prob)
 
-    churn_value = float(row.get("churn", 0))
-    churn_score = round(churn_value, 2)
-
-    action = decide_action(churn_score)
-
-    result = execute_action(
-        action=action,
-        customer_id=customer_id,
-        churn_score=churn_score,
+    # Action execution
+    action_result = execute_action(
+        action=decision["recommended_action"],
+        customer_id=row["customer_id"],
+        churn_score=churn_prob,
         row_data=row
     )
 
+    # Return result for logging/UI
     return {
-        "customer_id": customer_id,
-        "churn_score": churn_score,
-        "action": action,
-        "result": result
+        "customer_id": row["customer_id"],
+        "churn_prob": churn_prob,
+        "flags": flags,
+        "economic_value": econ_value,
+        "decision": decision["recommended_action"],
+        "followup_email": decision.get("followup_email"),
+        "justification": decision.get("justification"),
+        "action_result": action_result
     }
 
+# RUN BATCH 
+@app.post("/run-batch/")
+def run_batch(customers: List[Dict[str, Any]]):
+    """
+    Execute the workflow for a batch of customers.
+    Generate a consolidated summary for the manager.
+    """
+    # Clean data
+    cleaned_customers = [clean_row(c) for c in customers]
 
-@app.post("/run-batch")
-def run_batch(limit: int = 10):
-    df = pd.read_csv(CSV_PATH).head(limit)
+    # Batch decisions
+    batch_result = batch_decisions(cleaned_customers)
+    customer_actions = batch_result["customer_actions"]
+    manager_summary = batch_result["manager_summary"]
 
-    results = []
-
-    for _, row in df.iterrows():
-        row_dict = clean_row(row.to_dict())
-
-        churn_score = float(row_dict.get("churn", 0))
-        action = decide_action(churn_score)
-
-        result = execute_action(
-            action=action,
-            customer_id=row_dict["customer_id"],
-            churn_score=churn_score,
-            row_data=row_dict
+    # Execute actions per client
+    for action_data in customer_actions:
+        execute_action(
+            action=action_data["recommended_action"],
+            customer_id=action_data["customer_id"],
+            churn_score=action_data["churn_prob"],
+            row_data=action_data
         )
 
-        results.append({
-            "customer_id": row_dict["customer_id"],
-            "churn_score": churn_score,
-            "action": action,
-            "status": result["status"]
-        })
-
+    # Return summary for manager
     return {
-        "processed": len(results),
-        "results": results
+        "processed_customers": len(cleaned_customers),
+        "customer_actions": customer_actions,
+        "manager_summary": manager_summary
     }
-
