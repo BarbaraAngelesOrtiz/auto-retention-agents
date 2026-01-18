@@ -146,6 +146,12 @@ This makes the system:
 
 ## ⚙️ Action Agent (Core Orchestrator)
 
+All executions go through:
+
+```python
+execute_action(decision)
+```
+
 Responsibilities:
 
 - Channel selection (email / calendar / telegram / audit)
@@ -166,25 +172,28 @@ For `REQUIRES_HUMAN_CONTACT`:
 
 ## 📌 Action Channels
 
-The Action Agent executes each customer action through a single orchestrator (execute_action()), triggering the appropriate channel depending on churn risk:
+The Action Agent executes each customer action through a single orchestrator (`action_agent()`), triggering the appropriate channel depending on churn risk:
 
-* Email: Sends personalized or summary emails to managers.
+**Email**  
+Sends personalized or summary emails to managers.  
 
-![Google Agent](images/Gmail_and_Meet.png)
+![Gmail and Meet](images/Gmail_and_Meet.png)  
+![Gmail Summary](images/Gmail_Summary.png)  
 
-![Google Agent](images/Gmail_Summary.png)
+**Calendar**  
+Schedules meetings and generates Google Meet links for high-risk customers.  
 
-* Calendar: Schedules meetings and generates Google Meet links for high-risk customers.
+![Calendar and Meet](images/Calendar_and_Meet.png)  
 
-![Google Agent](images/Calendar_and_Meet.png)
+**Telegram**  
+Sends critical alerts or engagement messages via the Telegram bot.  
 
-* Telegram : Sends critical alerts or engagement messages via the Telegram bot.
+![Telegram](images/Telegram.png)  
 
-![Telegram Agent](images/Telegram.png)
+**Audit Sheet**  
+Logs actions and manager summaries in Google Sheets for auditing and reporting.  
 
-* Audit Sheet: Logs actions and manager summaries in Google Sheets for auditing and reporting.
-
-![Google Agent](images/Sheet Audit log.png)
+![Sheet Audit log](images/Sheet_Audit_log.png)
 
 ---
 
