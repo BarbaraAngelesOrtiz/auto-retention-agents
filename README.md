@@ -189,13 +189,14 @@ This makes the system:
 
 ## 👥 Manager Actions 
 
-- Aggregated churn distribution
-- Counts per decision category
-- Example customers per category
-- Google Sheet row
+- Aggregate churn distribution
+- Counts by decision category
+- Sample customers by category
+- Google Sheets row
 - Single email summary
-- Optional calendar sync (review meetings)
-- Automated daily execution via GitHub Actions (`main.py` runs on schedule)
+- Calendar synchronization (review meetings)
+- Telegram bot reporting for high-churn customers
+- Automated scheduled execution via GitHub Actions (`main.py` runs as scheduled)
 
 ---
 
@@ -483,7 +484,7 @@ Use the batch script to simulate a daily run:
 python test_batch_agents.py
 ```
 
-This mimics a scheduler-triggered execution (cron / Airflow).
+This mimics a scheduler-triggered execution Github Actions
 
 ### 🔒 Notes
 
@@ -499,7 +500,7 @@ This mimics a scheduler-triggered execution (cron / Airflow).
 
 <img src="https://github.com/user-attachments/assets/30ea0d40-a7a9-4b19-a835-c474b5cc50fb" width="115">
 
-[LinkedIn](https://www.linkedin.com/in/barbaraangelesortiz/) | 
+[LinkedIn](https://www.linkedin.com/in/barbaraangelesortiz/) 
 
 ![Status](https://img.shields.io/badge/status-in%20progress-yellow) 📅 January 2026
 
