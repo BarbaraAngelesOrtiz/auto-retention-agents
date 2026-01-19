@@ -121,6 +121,7 @@ auto-retention-agents/
 │  │  └─  test_telegram_agent.py       # Telegram bot tests
 │  │
 │  ├─ api/                            # FastAPI tests
+│  │  ├─ test_api_fastapi.py
 │  │  └─ test_api.py
 │  │
 │  └─ batch/                          # Batch execution tests
