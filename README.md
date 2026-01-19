@@ -77,6 +77,58 @@ Given a CSV containing customer data + churn probability (produced by an ML mode
                 └──────────────────────────────┘
           
 ```
+
+```bash
+auto-retention-agents/
+│ 
+├─ agents/
+│  ├─ decision_agent.py               # Contains business rules and decision logic
+│  ├─ action_agent.py                 # Orchestrates all action channels
+│  ├─ aggregation_agent.py            # Summarizes and aggregates decisions
+│  ├─ google_agents.py                # Gmail, Calendar, Sheets helpers
+│  ├─ telegram_agent.py               # Telegram bot integration
+│  └─ __pycache__/                    # Compiled Python files
+│
+├─ utils/                             # Utility and helper functions
+│  ├─ flags_utils.py                  # Feature flags and execution switches
+│  ├─ generate_churn_csv.py           # Churn data model generator
+│  ├─ __init__.py
+│  └─ __pycache__/                    # Compiled utility files
+│
+├─ data/                              # Input datasets
+│  ├─ customers_with_churn_prob.csv   # Customers with churn probability scores
+│  └─ rf_v1_baseline_train.csv        # Training dataset for churn model
+│
+├─ models/                            # Trained ML models
+│  └─ churn_model.joblib              # Random Forest churn prediction model
+│ 
+├─ images/                            # Agent illustrations and visuals
+│ 
+├─ config/                            # Config examples (without credentials)
+│  └─ credentials_example.json
+│
+├─ scripts/                           # Manual and one-off execution scripts
+│  └─ generate_refresh_token.py       # One-time Google OAuth token generator
+│
+├─ tests/                          
+│  ├─ agents/                         # Agent unit tests
+│  │  ├─ test_google_agents.py        # Google services integration tests
+│  │  ├─ test_telegram_agent.py       # Telegram bot tests
+│  │  └─ __pycache__/
+│  │
+│  ├─ api/                            # FastAPI tests
+│  │  └─ test_api.py
+│  │
+│  └─ batch/                          # Batch execution tests
+│     ├─ test_batch_agents.py
+│     └─ __pycache__/
+│ 
+├─ venv/                              # Virtual environment (ignored)
+├─ README.md                          # Project documentation
+├─ main.py                            # Entry point for batch execution
+├─ app.py                             # FastAPI demo layer
+└─ requirements.txt                   # Dependencies
+```
 ---
 
 ## 📊 Dataset
@@ -149,7 +201,7 @@ This makes the system:
 All executions go through:
 
 ```python
-execute_action(decision)
+action_agent(decision)
 ```
 
 Responsibilities:
@@ -203,6 +255,7 @@ Logs actions and manager summaries in Google Sheets for auditing and reporting.
 
 * Email only
 * Email + Meet + Calendar
+* Sheet Audit logs
 * Telegram message
 * No action
 
@@ -218,7 +271,7 @@ FastAPI endpoints used for **simulation and demos**:
 
 Validate batch behavior with CSV inputs:
 
-- Multiple customers (4k–5k scale)
+- Multiple customers (4k scale)
 - Deterministic churn-based decisions (non-random)
 - Real integrations enabled (email, sheets, calendar)
 
@@ -276,7 +329,7 @@ Endpoints:
 
 ## 🎯 Why this project?
 
-This is **not a toy project**. It demonstrates:
+This is **a real business project**. It demonstrates:
 
 - Multi‑agent orchestration
 - Batch‑first, manager‑aware design
@@ -382,7 +435,7 @@ Example response:
 
 You can test specific flows:
 
-* Google APIs: Email + Calendar + Meet
+* Google APIs: Email + Calendar + Meet + Sheet
 * Telegram message
 
 ### 9. Simulate daily execution
@@ -400,7 +453,7 @@ Supports:
 Use the batch script to simulate a daily run:
 
 ```bash
-python test_batch_random.py
+python test_batch_agents.py
 ```
 
 This mimics a scheduler-triggered execution (cron / Airflow).
