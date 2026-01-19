@@ -122,10 +122,13 @@ auto-retention-agents/
 │  │
 │  ├─ api/                            # FastAPI tests
 │  │  ├─ test_api_fastapi.py
-│  │  └─ test_api.py
+│  │  ├─ test_api.py
+│  │  └─ __init__.py
 │  │
-│  └─ batch/                          # Batch execution tests
-│     └─ test_batch_agents.py
+│  ├─ batch/                          # Batch execution tests
+│  │  └─ test_batch_agents.py
+│  │
+│  └─ __init__.py
 │ 
 ├─ README.md                          # Project documentation
 ├─ main.py                            # Entry point for batch execution
