@@ -441,7 +441,7 @@ http://127.0.0.1:8000/docs
 
 Runs a batch of customers with simulated churn scores and real actions:
 ```bash
-python test_batch_random.py
+python -m pytest tests/batch/test_batch_agents.py -s
 ```
 
 ### 7. Test API batch execution
