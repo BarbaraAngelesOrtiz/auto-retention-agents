@@ -86,14 +86,12 @@ auto-retention-agents/
 │  ├─ action_agent.py                 # Orchestrates all action channels
 │  ├─ aggregation_agent.py            # Summarizes and aggregates decisions
 │  ├─ google_agents.py                # Gmail, Calendar, Sheets helpers
-│  ├─ telegram_agent.py               # Telegram bot integration
-│  └─ __pycache__/                    # Compiled Python files
+│  └─ telegram_agent.py               # Telegram bot integration
 │
 ├─ utils/                             # Utility and helper functions
 │  ├─ flags_utils.py                  # Feature flags and execution switches
 │  ├─ generate_churn_csv.py           # Churn data model generator
-│  ├─ __init__.py
-│  └─ __pycache__/                    # Compiled utility files
+│  └─ __init__.py
 │
 ├─ data/                              # Input datasets
 │  ├─ customers_with_churn_prob.csv   # Customers with churn probability scores
@@ -113,17 +111,14 @@ auto-retention-agents/
 ├─ tests/                          
 │  ├─ agents/                         # Agent unit tests
 │  │  ├─ test_google_agents.py        # Google services integration tests
-│  │  ├─ test_telegram_agent.py       # Telegram bot tests
-│  │  └─ __pycache__/
+│  │  └─  test_telegram_agent.py       # Telegram bot tests
 │  │
 │  ├─ api/                            # FastAPI tests
 │  │  └─ test_api.py
 │  │
 │  └─ batch/                          # Batch execution tests
-│     ├─ test_batch_agents.py
-│     └─ __pycache__/
+│     └─ test_batch_agents.py
 │ 
-├─ venv/                              # Virtual environment (ignored)
 ├─ README.md                          # Project documentation
 ├─ main.py                            # Entry point for batch execution
 ├─ app.py                             # FastAPI demo layer
