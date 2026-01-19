@@ -405,7 +405,7 @@ DRY_RUN=true
 When creating a GitHub Actions workflow trigger (e.g., push, schedule), it's safer to store secrets as GitHub Actions environment variables rather than committing the .env file.
 
 1. Go to your repository -> Settings -> Secrets and variables -> Actions -> New repository secret
-2. Add each secret (e.g., GOOGLE_CREDENTIALS_JSON, TELEGRAM_BOT_TOKEN, etc.)
+2. Add each secret (e.g., GMAIL_CLIENT_ID, TELEGRAM_BOT_TOKEN, etc.)
 3️. In your workflow YAML, reference them like this:
 
 ```bash
