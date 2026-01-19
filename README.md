@@ -410,8 +410,14 @@ When creating a GitHub Actions workflow trigger (e.g., push, schedule), it's saf
 
 ```bash
  env:
-   GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+   GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
+   GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
+   GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN}}
+   GMAIL_RECIPIENT: ${{ secrets.GMAIL_RECIPIENT}}
+   SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+
    TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 ```
 
 This way, sensitive credentials are never committed to GitHub and are safely injected when the workflow runs.
