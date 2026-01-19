@@ -2,6 +2,8 @@
 
 import os
 import base64
+import json
+
 from email.mime.text import MIMEText
 from typing import Dict, List
 from datetime import datetime, timedelta
@@ -14,10 +16,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
-# -----------------------------
-# ENV
-# -----------------------------
 GMAIL_CLIENT_ID = os.getenv("GMAIL_CLIENT_ID")
 GMAIL_CLIENT_SECRET = os.getenv("GMAIL_CLIENT_SECRET")
 GMAIL_REFRESH_TOKEN = os.getenv("GMAIL_REFRESH_TOKEN")
@@ -30,9 +28,6 @@ SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
 ]
 
-# -----------------------------
-# Credenciales
-# -----------------------------
 def get_credentials():
     creds = Credentials(
         None,
@@ -45,6 +40,36 @@ def get_credentials():
     creds.refresh(Request())
     return creds
 
+def get_credentials_from_json():
+    """
+    Used for local dev or legacy OAuth file-based flow.
+    """
+    from google.oauth2.credentials import Credentials
+    import json
+    import os
+
+    creds_json = os.getenv("GOOGLE_CREDENTIALS_JSON")
+    if creds_json:
+        return Credentials.from_authorized_user_info(
+            json.loads(creds_json),
+            scopes=SCOPES
+        )
+
+    return Credentials.from_authorized_user_file(
+        "config/credentials.json",
+        scopes=SCOPES
+    )
+
+def get_google_credentials():
+    """
+    Smart credentials loader.
+    """
+    if os.getenv("GMAIL_REFRESH_TOKEN"):
+        return get_credentials()
+
+    return get_credentials_from_json()
+   
+
 # Gmail
 
 def send_email(subject: str, body: str, recipient: str = None) -> Dict:
@@ -53,7 +78,8 @@ def send_email(subject: str, body: str, recipient: str = None) -> Dict:
         return {"status": "error", "error": "No email recipient configured"}
 
     try:
-        creds = get_credentials()
+        #creds = get_credentials() #original line main.py
+        creds = get_google_credentials()
         service = build("gmail", "v1", credentials=creds)
 
         message = MIMEText(body)
