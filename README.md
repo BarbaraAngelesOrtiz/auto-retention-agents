@@ -9,6 +9,7 @@ A Python-based multi-agent system designed to analyze churn risk at scale (4k cu
 * Selective real-world actions (Email, Calendar, Telegram)
 * FastAPI for interactive demos 
 * Production-oriented design (dry-run, feature flags, schedulers)
+* Fully automated execution via GitHub Actions
 
 This project is intentionally manager-first: instead of spamming thousands of customers, it focuses on decision transparency, aggregation, and operational realism.
 
@@ -25,6 +26,7 @@ Given a CSV containing customer data + churn probability (produced by an ML mode
 5. Sends a single manager email with insights
 6. Optionally triggers real actions for a small sample of customers
 7. Exposes a FastAPI layer for demos and testing
+8. Runs automatically on GitHub Actions(scheduled or on-demand)
 
 ---
 
@@ -77,9 +79,14 @@ Given a CSV containing customer data + churn probability (produced by an ML mode
                 └──────────────────────────────┘
           
 ```
+**⚡ Automation:** `main.py` runs fully via GitHub Actions, triggering batch processing, manager reporting, and all action channels automatically.
 
 ```bash
 auto-retention-agents/
+│ 
+├─ github/
+│  └─ workflows                       # GitHub Actions workflows
+│       └─ run-main.yml               # Executes main.py automatically on schedule or push 
 │ 
 ├─ agents/
 │  ├─ decision_agent.py               # Contains business rules and decision logic
@@ -188,6 +195,7 @@ This makes the system:
 - Google Sheet row
 - Single email summary
 - Optional calendar sync (review meetings)
+- Automated daily execution via GitHub Actions (`main.py` runs on schedule)
 
 ---
 
@@ -206,6 +214,7 @@ Responsibilities:
 - OAuth handling & refresh
 - Failure isolation
 - Audit logging
+- Supports scheduled triggers: local batch runs or GitHub Actions workflow
 
 ### Example High‑Risk Flow
 
@@ -269,11 +278,12 @@ Validate batch behavior with CSV inputs:
 - Multiple customers (4k scale)
 - Deterministic churn-based decisions (non-random)
 - Real integrations enabled (email, sheets, calendar)
+- GitHub Actions automated execution tested successfully
 
 ✅ Scheduler Simulation
 
-* Manual execution 
-* Prepared for GitHub Actions
+- Manual execution 
+- Prepared for GitHub Actions
 
 ✅ Controlled Error & Failure Tests
 
@@ -315,7 +325,6 @@ Endpoints:
 ---
 ## 🚧 Next Steps
 
-- ⏰ GitHub Actions daily execution
 - 🧠 Replace rules with ML explainability layer
 - ☁️ Cloud deployment (GCP / AWS / Azure)
 - 📊 Manager dashboard (BI / Looker / Streamlit)
@@ -331,6 +340,7 @@ This is **a real business project**. It demonstrates:
 - Real API integrations
 - Production constraints (scale, cost, safety)
 - Clear separation of decision vs execution
+- Automation using Github actions
 
 It mirrors **how retention systems actually work in companies**.
 ---
@@ -364,7 +374,7 @@ pip install -r requirements.txt
 
 ### 4. Environment variables
 
-Create a .env file (never commit it):
+Create a .env file:
 
 ```bash
 
@@ -455,10 +465,9 @@ This mimics a scheduler-triggered execution (cron / Airflow).
 
 ### 🔒 Notes
 
-* .env must never be committed
 * Google OAuth tokens may expire (handled by refresh logic)
 * Failures are logged and do not crash the pipeline
-* All actions are executed through a single execute_action() entry point
+* All actions are executed through a single entry point
 
 ---
 
