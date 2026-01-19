@@ -398,25 +398,23 @@ TELEGRAM_CHAT_ID=your_chat_id
 # Others
 DRY_RUN=true
 
-# ===========================
-# Notes for GitHub Actions
-# ===========================
-# When creating a GitHub Actions workflow trigger (e.g., push, schedule), 
-# it's safer to store secrets as GitHub Actions environment variables 
-# rather than committing the .env file.
-#
-# 1. Go to your repository -> Settings -> Secrets and variables -> Actions -> New repository secret
-# 2. Add each secret (e.g., GOOGLE_CREDENTIALS_JSON, TELEGRAM_BOT_TOKEN, etc.)
-# 3️. In your workflow YAML, reference them like this:
-#
-# env:
-#   GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
-#   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-#
-# This way, sensitive credentials are never committed to GitHub and are safely injected 
-# when the workflow runs.
-
 ```
+
+#### 🚨Notes for GitHub Actions
+
+When creating a GitHub Actions workflow trigger (e.g., push, schedule), it's safer to store secrets as GitHub Actions environment variables rather than committing the .env file.
+
+1. Go to your repository -> Settings -> Secrets and variables -> Actions -> New repository secret
+2. Add each secret (e.g., GOOGLE_CREDENTIALS_JSON, TELEGRAM_BOT_TOKEN, etc.)
+3️. In your workflow YAML, reference them like this:
+
+```bash
+ env:
+   GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+```
+
+This way, sensitive credentials are never committed to GitHub and are safely injected when the workflow runs.
 
 ### 5. Run the FastAPI server
 
