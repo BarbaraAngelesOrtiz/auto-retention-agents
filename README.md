@@ -506,7 +506,7 @@ This mimics a scheduler-triggered execution Github Actions
 
 [LinkedIn](https://www.linkedin.com/in/barbaraangelesortiz/) 
 
-![Status](https://img.shields.io/badge/status-%finished20-yellow) 📅 January 2026
+![Status](https://img.shields.io/badge/status-finished%20-yellow) 📅 January 2026
 
 ![Python](https://img.shields.io/badge/python-3.10-blue)
 ![Pandas](https://img.shields.io/badge/pandas-2.1.0-blue)
